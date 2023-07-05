@@ -1,3 +1,7 @@
 <h1>Show Map</h1>
-<div class="row"><app-hexagon></app-hexagon></div>
-<div class="row"><app-hexagon></app-hexagon></div>
+<div class="row" *ngFor="let hexagon of hexagonsData">
+  <app-hexagon
+    [hexagonText]="hexagon.text"
+    [hexagonColor]="hexagon.color"
+  ></app-hexagon>
+</div>
