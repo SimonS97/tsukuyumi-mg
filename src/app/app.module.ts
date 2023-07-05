@@ -11,9 +11,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { HomeComponent } from './home/home.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ShowMapComponent } from './show-map/show-map.component';
+import { HexagonComponent } from './hexagon/hexagon.component';
 
 @NgModule({
-  declarations: [AppComponent, ShowMapComponent, HomeComponent],
+  declarations: [AppComponent, ShowMapComponent, HomeComponent, HexagonComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
