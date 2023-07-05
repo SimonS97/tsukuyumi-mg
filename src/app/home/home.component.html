@@ -1,4 +1,31 @@
-<h1>{{ title }}</h1>
-<button type="button" routerLink="/show-map" mat-button color="primary">
-  Primary
-</button>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1>{{ title }}</h1>
+    </div>
+  </div>
+  <div class="row">
+    <mat-form-field>
+      <mat-select>
+        <mat-label>Anz. Spieler</mat-label>
+        <mat-option value="2">2</mat-option>
+        <mat-option value="3">3</mat-option>
+        <mat-option value="4">4</mat-option>
+        <mat-option value="5">5</mat-option>
+        <mat-option value="6">6</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <mat-checkbox class="example-margin">Default Settings</mat-checkbox>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <button type="button" routerLink="/show-map" mat-button color="primary">
+        Map Generieren!
+      </button>
+    </div>
+  </div>
+</div>
