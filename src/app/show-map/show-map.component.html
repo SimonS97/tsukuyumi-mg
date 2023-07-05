@@ -1,7 +1,2 @@
 <h1>Show Map</h1>
-<div class="row" *ngFor="let hexagon of hexagonsData">
-  <app-hexagon
-    [hexagonText]="hexagon.text"
-    [hexagonColor]="hexagon.color"
-  ></app-hexagon>
-</div>
+<canvas #pixiCanvas></canvas>
