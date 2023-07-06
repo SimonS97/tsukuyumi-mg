@@ -1,0 +1,38 @@
+{
+  "areaType": [
+    {
+      "requiredAmount": 14,
+      "title": "Meeresboden"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Schwemmland"
+    },
+    {
+      "requiredAmount": 4,
+      "title": "Gebirge"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Flussland"
+    },
+    {
+      "requiredAmount": 2,
+      "title": "Instabil"
+    },
+    {
+      "requiredAmount": 2,
+      "title": "Radioaktiv"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Tsukuyumi Gebiet"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Toxisch"
+    }
+  ],
+  "hasMoon": true,
+  "playerAmount": 4
+}
