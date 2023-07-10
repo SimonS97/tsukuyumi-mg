@@ -7,11 +7,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { HttpClientModule } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { HomeComponent } from './home/home.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ShowMapComponent } from './show-map/show-map.component';
 import { HexagonComponent } from './hexagon/hexagon.component';
+
 
 @NgModule({
   declarations: [AppComponent, ShowMapComponent, HomeComponent, HexagonComponent],
@@ -23,6 +25,7 @@ import { HexagonComponent } from './hexagon/hexagon.component';
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    HttpClientModule,
     MatSelectModule,
   ],
   providers: [],

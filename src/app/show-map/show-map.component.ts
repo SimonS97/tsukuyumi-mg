@@ -1,6 +1,8 @@
 import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { defineHex, Grid, rectangle } from 'honeycomb-grid';
+import { HttpClient } from '@angular/common/http';
+import { Maprules } from '../maprules';
 
 @Component({
   selector: 'app-show-map',
@@ -14,8 +16,16 @@ export class ShowMapComponent implements AfterViewInit {
   hexagonOrigin = 'topLeft'; // 'center' if you want the center to be the origin
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
-  gridWidth = 5;
+  // Aktuell 36 Tiles
+  gridWidth = 6;
   gridHeight = 6;
+  // rules = new Map<string, number>();
+  ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
+  configUrl = 'assets/rules.json';
+
+  constructor(private http: HttpClient) {
+    this.getConfig();
+  }
 
   ngAfterViewInit(): void {
     const Hex = defineHex({
@@ -44,6 +54,23 @@ export class ShowMapComponent implements AfterViewInit {
       counter++;
     });
     console.log(counter);
+    this.generateConfig();
+  }
+
+  getConfig() {
+    return this.http.get<Maprules>(this.configUrl);
+  }
+
+  generateConfig() {
+    this.getConfig().subscribe((data: Maprules) => {
+      this.ruleSet = {
+        areaType: data.areaType,
+        hasMoon: data.hasMoon,
+        playerAmount: data.playerAmount,
+      };
+      console.log('Geladenes Regelwerk:');
+      console.log(this.ruleSet);
+    });
   }
 }
 
