@@ -13,7 +13,7 @@ import { HexagonType } from '../hexagon-type';
 export class ShowMapComponent implements AfterViewInit {
   @ViewChild('pixiCanvas', { static: true })
   pixiCanvas!: ElementRef<HTMLCanvasElement>;
-  hexagonSize = 40;
+  hexagonSize = 45;
   hexagonOrigin = 'topLeft'; // 'center' if you want the center to be the origin
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
@@ -125,9 +125,6 @@ export class ShowMapComponent implements AfterViewInit {
     const graphics = new PIXI.Graphics();
     app.stage.addChild(graphics);
 
-    // Hiermit Hexagons Ausblende + Text #fffff
-    graphics.lineStyle(1, 0x999999);
-
     let counter = 0;
     grid.forEach((hex: any) => {
       const newText = this.renderHex(hex, graphics, counter);
@@ -137,12 +134,13 @@ export class ShowMapComponent implements AfterViewInit {
     console.log(counter);
   }
 
-  renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Text {
+  renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
     // Übergebene Titel des Hexagons
     let title = this.hexagonTitles[counter];
 
     // Setze den Linienstyle der Hexagons
-    this.setHexagonLineStyle(graphics, title);
+    // this.setHexagonLineStyle(graphics, title);
+    graphics.lineStyle(1, '#ffffff', 0.5);
 
     // Ermittle den Textstyle, falls benötigt
     const textStyle = this.getHexagonText(title);
@@ -155,12 +153,25 @@ export class ShowMapComponent implements AfterViewInit {
       coordinateText = '';
     }
 
-    const text = new PIXI.Text(coordinateText, textStyle);
-    text.anchor.set(0.5);
-    text.x = hex.x;
-    text.y = hex.y;
+    let newSprite = this.createHexagonImage(title);
 
-    return text;
+    // Zentriere das Sprite innerhalb des Hexagons
+    newSprite.anchor.set(0.5);
+    newSprite.x = hex.x;
+    newSprite.y = hex.y;
+    newSprite.scale.set(0.12);
+    newSprite.rotation = 0.52;
+
+    return newSprite;
+  }
+
+  createHexagonImage(hexagonTitle: HexagonType): PIXI.Sprite {
+    if (hexagonTitle === 'leer') {
+      return new PIXI.Sprite();
+    }
+    const texture = PIXI.Texture.from('assets/' + hexagonTitle + '.png');
+    const sprite = new PIXI.Sprite(texture);
+    return sprite;
   }
 
   getHexagonText(title: HexagonType): PIXI.TextStyle {

@@ -8,4 +8,5 @@ export enum HexagonType {
   Radioaktiv = 'Radioaktiv',
   Tsukuyumi = 'Tsukuyumi',
   Toxisch = 'Toxisch',
+  Mondfeld = 'Mondfeld'
 }
