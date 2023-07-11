@@ -41,8 +41,11 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   // Hier sollen alle Titel der Hexagons befüllt werden
-  generateTitles() {
-    this.createDefaultHexagons(this.hexagonTitles);
+  generateHexagonTitles() {
+    const areaTypes = Object.values(HexagonType);
+    for (const areaType of areaTypes) {
+      this.createHexagonsByAreaType(areaType);
+    }
   }
 
   getConfig() {
@@ -62,30 +65,37 @@ export class ShowMapComponent implements AfterViewInit {
       },
       complete: () => {
         // Hier werden die Schritte nach und nach im Anschluss der Config ausgeführt!
-        this.generateTitles();
+        this.generateHexagonTitles();
         this.createHexagonDrawing();
       },
     });
   }
 
   /*
-    Hier werden die Einzelnen Hexagon-Fälle generiert
+    Hier werden die Einzelnen Hexagon-Fälle generiert anhand es ruleSet
   */
 
-  createDefaultHexagons(hexagonTitles: string[]) {
+  createHexagonsByAreaType(title: HexagonType) {
     let count = 0;
+    let numberOfIterations = this.findAreaAmount(title);
 
-    const meeresBodenAnz = this.ruleSet.areaType.find(
-      (area) => area.title === 'Meeresboden'
-    )?.requiredAmount;
-    while (count < meeresBodenAnz!) {
+    while (count < numberOfIterations) {
       const randomIndex = Math.floor(Math.random() * 64);
-      if (this.isHexagonValidTarget(hexagonTitles[randomIndex])) {
-        hexagonTitles[randomIndex] = 'Meeresboden';
+      if (this.isHexagonValidTarget(this.hexagonTitles[randomIndex])) {
+        this.hexagonTitles[randomIndex] = title;
         count++;
       }
     }
   }
+
+  findAreaAmount(hexagonTitle: HexagonType): number {
+    return this.ruleSet.areaType.find((area) => area.title === hexagonTitle)
+      ?.requiredAmount!;
+  }
+
+  /*
+    Hexagon Validierungen und Fachliche Prüfungen
+  */
 
   isHexagonValidTarget(hexagon: string): boolean {
     if (hexagon === 'leer') {
@@ -131,16 +141,19 @@ export class ShowMapComponent implements AfterViewInit {
   renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Text {
     // Übergebene Titel des Hexagons
     let title = this.hexagonTitles[counter];
+
+    // Setze den Linienstyle der Hexagons
     this.setHexagonLineStyle(graphics, title);
+
+    // Ermittle den Textstyle, falls benötigt
+    const textStyle = this.getHexagonText(title);
 
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
-    const textStyle = this.getHexagonText(title);
-
     // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    // const coordinateText = hex.r.toString() + '/' + hex.q.toString();
+    const coordinateText = hex.r.toString() + '/' + hex.q.toString();
 
-    const text = new PIXI.Text(title, textStyle);
+    const text = new PIXI.Text(coordinateText, textStyle);
     text.anchor.set(0.5);
     text.x = hex.x;
     text.y = hex.y;
@@ -163,17 +176,26 @@ export class ShowMapComponent implements AfterViewInit {
       case 'Meeresboden':
         textStyle.fill = '#2CA6A4';
         return textStyle;
+      case 'Schwemmland':
+        textStyle.fill = '#776D5A';
+        return textStyle;
       case 'Gebirge':
+        textStyle.fill = '#655356';
         return textStyle;
       case 'Flussland':
+        textStyle.fill = '#25CED1';
         return textStyle;
       case 'Instabil':
+        textStyle.fill = '#E05263';
         return textStyle;
       case 'Radioaktiv':
+        textStyle.fill = '#FAE500';
         return textStyle;
       case 'Tsukuyumi':
+        textStyle.fill = '#7E52A0';
         return textStyle;
       case 'Toxisch':
+        textStyle.fill = '#2B9720';
         return textStyle;
 
       default:
@@ -189,23 +211,26 @@ export class ShowMapComponent implements AfterViewInit {
       case 'Meeresboden':
         graphics.lineStyle(1, '#2CA6A4');
         break;
+      case 'Schwemmland':
+        graphics.lineStyle(1, '#776D5A');
+        break;
       case 'Gebirge':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#655356');
         break;
       case 'Flussland':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#25CED1');
         break;
       case 'Instabil':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#E05263');
         break;
       case 'Radioaktiv':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#FAE500');
         break;
       case 'Tsukuyumi':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#7E52A0');
         break;
       case 'Toxisch':
-        graphics.lineStyle(1, 0x999999);
+        graphics.lineStyle(1, '#2B9720');
         break;
 
       default:
