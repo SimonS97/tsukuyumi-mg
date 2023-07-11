@@ -1,6 +1,6 @@
 import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
-import { defineHex, Grid, rectangle } from 'honeycomb-grid';
+import { defineHex, Grid, rectangle, Direction, Hex } from 'honeycomb-grid';
 import { HttpClient } from '@angular/common/http';
 import { Maprules } from '../maprules';
 import { HexagonType } from '../hexagon-type';
@@ -126,7 +126,14 @@ export class ShowMapComponent implements AfterViewInit {
     app.stage.addChild(graphics);
 
     let counter = 0;
-    grid.forEach((hex: any) => {
+    grid.forEach((hex: Hex) => {
+      let hasNeighbours = this.checkForNeighbourTitle(counter);
+      let tempCounter = counter;
+      while (hasNeighbours === false) {
+        this.moveHexagonToNeighbour(tempCounter);
+        hasNeighbours = this.checkForNeighbourTitle(tempCounter + 1);
+        tempCounter++;
+      }
       const newText = this.renderHex(hex, graphics, counter);
       app.stage.addChild(newText);
       counter++;
@@ -134,13 +141,104 @@ export class ShowMapComponent implements AfterViewInit {
     console.log(counter);
   }
 
+  checkForNeighbourTitle(counter: number): boolean {
+    let tempHex = this.hexagonTitles[counter];
+
+    if (tempHex === 'leer') {
+      return true;
+    }
+    let hexRight = this.hexagonTitles[counter + 1];
+    let hexLeft = this.hexagonTitles[counter - 1];
+    let hexTop = this.hexagonTitles[counter - 8];
+    let hexBottom = this.hexagonTitles[counter + 8];
+
+    if (
+      (hexRight === 'leer' || hexRight === undefined) &&
+      (hexTop === 'leer' || hexTop === undefined) &&
+      (hexLeft === 'leer' || hexLeft === undefined) &&
+      (hexBottom === 'leer' || hexBottom === undefined)
+    ) {
+      console.log('ELEMENT HAT KEINE NACHBARN!');
+      return false;
+    }
+
+    if (this.checkLeftSideEdgeCases(counter) === false) {
+      return false;
+    }
+
+    if (this.checkRightSideEdgeCases(counter) === false) {
+      return false;
+    }
+    return true;
+  }
+
+  checkLeftSideEdgeCases(counter: number) {
+    if (
+      counter === 0 ||
+      counter === 8 ||
+      counter === 16 ||
+      counter === 24 ||
+      counter === 32 ||
+      counter === 40 ||
+      counter === 48 ||
+      counter === 56
+    ) {
+    }
+    let hexRight = this.hexagonTitles[counter + 1];
+    let hexTop = this.hexagonTitles[counter - 8];
+    let hexBottom = this.hexagonTitles[counter + 8];
+
+    if (
+      (hexRight === 'leer' || hexRight === undefined) &&
+      (hexTop === 'leer' || hexTop === undefined) &&
+      (hexBottom === 'leer' || hexBottom === undefined)
+    ) {
+      console.log('ELEMENT HAT KEINE NACHBARN!');
+      return false;
+    }
+    return true;
+  }
+
+  checkRightSideEdgeCases(counter: number) {
+    if (
+      counter === 7 ||
+      counter === 15 ||
+      counter === 23 ||
+      counter === 31 ||
+      counter === 39 ||
+      counter === 47 ||
+      counter === 55 ||
+      counter === 63
+    ) {
+    }
+    let hexLeft = this.hexagonTitles[counter - 1];
+    let hexTop = this.hexagonTitles[counter - 8];
+    let hexBottom = this.hexagonTitles[counter + 8];
+
+    if (
+      (hexLeft === 'leer' || hexLeft === undefined) &&
+      (hexTop === 'leer' || hexTop === undefined) &&
+      (hexBottom === 'leer' || hexBottom === undefined)
+    ) {
+      console.log('ELEMENT HAT KEINE NACHBARN!');
+      return false;
+    }
+    return true;
+  }
+
+  moveHexagonToNeighbour(counter: number) {
+    let tempTitle = this.hexagonTitles[counter];
+    this.hexagonTitles[counter] = 'leer';
+    this.hexagonTitles[counter + 1] = tempTitle;
+  }
+
   renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
     // Übergebene Titel des Hexagons
     let title = this.hexagonTitles[counter];
 
     // Setze den Linienstyle der Hexagons
-    // this.setHexagonLineStyle(graphics, title);
-    graphics.lineStyle(1, '#ffffff', 0.5);
+    this.setHexagonLineStyle(graphics, title);
+    // graphics.lineStyle(1, '#ffffff', 0.5);
 
     // Ermittle den Textstyle, falls benötigt
     const textStyle = this.getHexagonText(title);
@@ -153,24 +251,44 @@ export class ShowMapComponent implements AfterViewInit {
       coordinateText = '';
     }
 
-    let newSprite = this.createHexagonImage(title);
-
-    // Zentriere das Sprite innerhalb des Hexagons
-    newSprite.anchor.set(0.5);
-    newSprite.x = hex.x;
-    newSprite.y = hex.y;
-    newSprite.scale.set(0.12);
-    newSprite.rotation = 0.52;
+    // Wechseln zwischen Bildern und Koordinaten Ansicht
+    // let newSprite = this.createHexagonImage(title, hex);
+    let newSprite = this.createHexagonText(hex, title, textStyle, counter);
 
     return newSprite;
   }
 
-  createHexagonImage(hexagonTitle: HexagonType): PIXI.Sprite {
+  createHexagonText(
+    hex: Hex,
+    title: string,
+    textStyle: any,
+    arrayIndex: number
+  ) {
+    const text = new PIXI.Text(arrayIndex, textStyle);
+    text.anchor.set(0.5);
+    text.x = hex.x;
+    text.y = hex.y;
+
+    text.anchor.set(0.5);
+    text.x = hex.x;
+    text.y = hex.y;
+
+    return text;
+  }
+
+  createHexagonImage(hexagonTitle: HexagonType, hex: Hex): PIXI.Sprite {
     if (hexagonTitle === 'leer') {
       return new PIXI.Sprite();
     }
     const texture = PIXI.Texture.from('assets/' + hexagonTitle + '.png');
     const sprite = new PIXI.Sprite(texture);
+
+    // Zentrierung und Anpassung der Bilder / Winkel etc
+    sprite.anchor.set(0.5);
+    sprite.x = hex.x;
+    sprite.y = hex.y;
+    sprite.scale.set(0.12);
+    sprite.rotation = 0.52;
     return sprite;
   }
 
