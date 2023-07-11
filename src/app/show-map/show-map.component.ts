@@ -3,7 +3,6 @@ import * as PIXI from 'pixi.js';
 import { defineHex, Grid, rectangle } from 'honeycomb-grid';
 import { HttpClient } from '@angular/common/http';
 import { Maprules } from '../maprules';
-import { Areatype } from '../areatype';
 import { HexagonType } from '../hexagon-type';
 
 @Component({
@@ -14,7 +13,7 @@ import { HexagonType } from '../hexagon-type';
 export class ShowMapComponent implements AfterViewInit {
   @ViewChild('pixiCanvas', { static: true })
   pixiCanvas!: ElementRef<HTMLCanvasElement>;
-  hexagonSize = 30;
+  hexagonSize = 40;
   hexagonOrigin = 'topLeft'; // 'center' if you want the center to be the origin
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein

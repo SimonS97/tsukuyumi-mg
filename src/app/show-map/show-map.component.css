@@ -2,6 +2,6 @@
 
 canvas {
   width: 100%;
-  height: 500px; /* Passe die Höhe nach Bedarf an */
+  height: 1000px; /* Passe die Höhe nach Bedarf an */
   border: 1px solid #ccc; /* Rahmen, um das Canvas sichtbar zu machen */
 }
