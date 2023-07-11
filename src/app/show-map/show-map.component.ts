@@ -150,7 +150,10 @@ export class ShowMapComponent implements AfterViewInit {
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
     // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    const coordinateText = hex.r.toString() + '/' + hex.q.toString();
+    let coordinateText = hex.r.toString() + '/' + hex.q.toString();
+    if (title === 'leer') {
+      coordinateText = '';
+    }
 
     const text = new PIXI.Text(coordinateText, textStyle);
     text.anchor.set(0.5);
@@ -205,7 +208,7 @@ export class ShowMapComponent implements AfterViewInit {
   setHexagonLineStyle(graphics: PIXI.Graphics, hexagonTitle: HexagonType) {
     switch (hexagonTitle) {
       case 'leer':
-        graphics.lineStyle(1, 0x999999, 0.5);
+        graphics.lineStyle(1, '#ffffff', 0.5);
         break;
       case 'Meeresboden':
         graphics.lineStyle(1, '#2CA6A4');
