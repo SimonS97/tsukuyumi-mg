@@ -23,8 +23,8 @@ export class ShowMapComponent implements AfterViewInit {
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
   // default
-  // hexagonTitles = Array(64).fill('leer');
   hexagonTitles = Array(42).fill('leer');
+  availableIndexes = this.hexagonTitles.length;
 
   constructor(private http: HttpClient) {
     this.getConfig();
@@ -36,9 +36,14 @@ export class ShowMapComponent implements AfterViewInit {
 
   // Hier sollen alle Titel der Hexagons befüllt werden
   generateHexagonTitles() {
+    this.createMondfeld(this.hexagonTitles);
     const areaTypes = Object.values(HexagonType);
     for (const areaType of areaTypes) {
-      this.createHexagonsByAreaType(areaType);
+      if (areaType === 'Mondfeld') {
+        return;
+      } else {
+        this.createHexagonsByAreaType(areaType);
+      }
     }
   }
 
@@ -74,12 +79,34 @@ export class ShowMapComponent implements AfterViewInit {
     let numberOfIterations = this.findAreaAmount(title);
 
     while (count < numberOfIterations) {
-      const randomIndex = Math.floor(Math.random() * 64);
+      const randomIndex = Math.floor(Math.random() * this.availableIndexes);
       if (this.isHexagonValidTarget(this.hexagonTitles[randomIndex])) {
         this.hexagonTitles[randomIndex] = title;
         count++;
       }
     }
+  }
+
+  createMondfeld(array: any) {
+    const gridWidth = 7; // Breite des Grids
+    const gridHeight = 6; // Höhe des Grids
+    const mondIndices = [0, 1, 8, 15, 14, 6, 7]; // Indizes des Mondfelds
+    const randomizedArray = [...array]; // Erstelle eine Kopie des Arrays, um das ursprüngliche Array nicht zu verändern
+
+    // Wähle eine zufällige obere linke Ecke für das Mondfeld
+    const randomRow = Math.floor(Math.random() * (gridHeight - 2)); // Zufällige Zeile (Höhe - 2, um das Mondfeld in das Grid passen zu lassen)
+    const randomCol = Math.floor(Math.random() * (gridWidth - 3)); // Zufällige Spalte (Breite - 3, um das Mondfeld in das Grid passen zu lassen)
+    const startIndex = randomRow * gridWidth + randomCol;
+
+    // Platziere das Mondfeld in das Grid
+    for (let i = 0; i < mondIndices.length; i++) {
+      const rowOffset = Math.floor(mondIndices[i] / gridWidth);
+      const colOffset = mondIndices[i] % gridWidth;
+      const gridIndex = startIndex + rowOffset * gridWidth + colOffset;
+      randomizedArray[gridIndex] = 'Mondfeld';
+    }
+
+    this.hexagonTitles = randomizedArray;
   }
 
   findAreaAmount(hexagonTitle: HexagonType): number {
