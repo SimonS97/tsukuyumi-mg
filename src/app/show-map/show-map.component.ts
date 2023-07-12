@@ -20,15 +20,8 @@ export class ShowMapComponent implements AfterViewInit {
   // Wir benötigen im Default 28 + 8 MondTiles
   gridWidth = 8;
   gridHeight = 8;
-  // rules = new Map<string, number>();
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
-  titleSet = [];
   configUrl = 'assets/rules.json';
-  availableGridSize = this.gridWidth * this.gridHeight;
-  numberArray = Array.from(
-    { length: this.availableGridSize },
-    (_, index) => index + 1
-  );
   hexagonTitles = Array(64).fill('leer');
 
   constructor(private http: HttpClient) {
@@ -144,7 +137,10 @@ export class ShowMapComponent implements AfterViewInit {
   checkForNeighbourTitle(counter: number): boolean {
     let tempHex = this.hexagonTitles[counter];
 
-    if (tempHex === 'leer') {
+    if (tempHex === 'leer' || tempHex === undefined) {
+      if (this.checkMissingHorizontalConnection(counter) === false) {
+        return false;
+      }
       return true;
     }
     let hexRight = this.hexagonTitles[counter + 1];
@@ -169,6 +165,24 @@ export class ShowMapComponent implements AfterViewInit {
     if (this.checkRightSideEdgeCases(counter) === false) {
       return false;
     }
+    return true;
+  }
+
+  checkMissingHorizontalConnection(counter: number): boolean {
+    // Hexagon ist immer Leer in diesem Fall!
+    let hexRight = this.hexagonTitles[counter + 1];
+    let hexLeft = this.hexagonTitles[counter - 1];
+    let hexTop = this.hexagonTitles[counter - 8];
+    let hexBottom = this.hexagonTitles[counter + 8];
+
+    if (
+      (hexRight === 'leer' || hexRight === undefined) &&
+      (hexTop !== 'leer' || hexTop !== undefined) &&
+      (hexBottom !== 'leer' || hexBottom !== undefined)
+    ) {
+      return false;
+    }
+
     return true;
   }
 
