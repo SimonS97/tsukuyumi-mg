@@ -18,11 +18,13 @@ export class ShowMapComponent implements AfterViewInit {
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
   // Wir benötigen im Default 28 + 8 MondTiles
-  gridWidth = 8;
-  gridHeight = 8;
+  gridWidth = 6;
+  gridHeight = 6;
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
-  hexagonTitles = Array(64).fill('leer');
+  // default
+  // hexagonTitles = Array(64).fill('leer');
+  hexagonTitles = Array(36).fill('leer');
 
   constructor(private http: HttpClient) {
     this.getConfig();
@@ -251,7 +253,7 @@ export class ShowMapComponent implements AfterViewInit {
     let title = this.hexagonTitles[counter];
 
     // Setze den Linienstyle der Hexagons
-    this.setHexagonLineStyle(graphics, title);
+    // this.setHexagonLineStyle(graphics, title);
     // graphics.lineStyle(1, '#ffffff', 0.5);
 
     // Ermittle den Textstyle, falls benötigt
@@ -266,8 +268,8 @@ export class ShowMapComponent implements AfterViewInit {
     }
 
     // Wechseln zwischen Bildern und Koordinaten Ansicht
-    // let newSprite = this.createHexagonImage(title, hex);
-    let newSprite = this.createHexagonText(hex, title, textStyle, counter);
+    let newSprite = this.createHexagonImage(title, hex);
+    // let newSprite = this.createHexagonText(hex, title, textStyle, counter);
 
     return newSprite;
   }
