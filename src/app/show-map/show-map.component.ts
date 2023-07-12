@@ -18,13 +18,13 @@ export class ShowMapComponent implements AfterViewInit {
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
   // Wir benötigen im Default 28 + 8 MondTiles
-  gridWidth = 6;
+  gridWidth = 7;
   gridHeight = 6;
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
   // default
   // hexagonTitles = Array(64).fill('leer');
-  hexagonTitles = Array(36).fill('leer');
+  hexagonTitles = Array(42).fill('leer');
 
   constructor(private http: HttpClient) {
     this.getConfig();
@@ -122,130 +122,11 @@ export class ShowMapComponent implements AfterViewInit {
 
     let counter = 0;
     grid.forEach((hex: Hex) => {
-      let hasNeighbours = this.checkForNeighbourTitle(counter);
-      let tempCounter = counter;
-      while (hasNeighbours === false) {
-        this.moveHexagonToNeighbour(tempCounter);
-        hasNeighbours = this.checkForNeighbourTitle(tempCounter + 1);
-        tempCounter++;
-      }
       const newText = this.renderHex(hex, graphics, counter);
       app.stage.addChild(newText);
       counter++;
     });
     console.log(counter);
-  }
-
-  checkForNeighbourTitle(counter: number): boolean {
-    let tempHex = this.hexagonTitles[counter];
-
-    if (tempHex === 'leer' || tempHex === undefined) {
-      if (this.checkMissingHorizontalConnection(counter) === false) {
-        return false;
-      }
-      return true;
-    }
-    let hexRight = this.hexagonTitles[counter + 1];
-    let hexLeft = this.hexagonTitles[counter - 1];
-    let hexTop = this.hexagonTitles[counter - 8];
-    let hexBottom = this.hexagonTitles[counter + 8];
-
-    if (
-      (hexRight === 'leer' || hexRight === undefined) &&
-      (hexTop === 'leer' || hexTop === undefined) &&
-      (hexLeft === 'leer' || hexLeft === undefined) &&
-      (hexBottom === 'leer' || hexBottom === undefined)
-    ) {
-      console.log('ELEMENT HAT KEINE NACHBARN!');
-      return false;
-    }
-
-    if (this.checkLeftSideEdgeCases(counter) === false) {
-      return false;
-    }
-
-    if (this.checkRightSideEdgeCases(counter) === false) {
-      return false;
-    }
-    return true;
-  }
-
-  checkMissingHorizontalConnection(counter: number): boolean {
-    // Hexagon ist immer Leer in diesem Fall!
-    let hexRight = this.hexagonTitles[counter + 1];
-    let hexLeft = this.hexagonTitles[counter - 1];
-    let hexTop = this.hexagonTitles[counter - 8];
-    let hexBottom = this.hexagonTitles[counter + 8];
-
-    if (
-      (hexRight === 'leer' || hexRight === undefined) &&
-      (hexTop !== 'leer' || hexTop !== undefined) &&
-      (hexBottom !== 'leer' || hexBottom !== undefined)
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  checkLeftSideEdgeCases(counter: number) {
-    if (
-      counter === 0 ||
-      counter === 8 ||
-      counter === 16 ||
-      counter === 24 ||
-      counter === 32 ||
-      counter === 40 ||
-      counter === 48 ||
-      counter === 56
-    ) {
-    }
-    let hexRight = this.hexagonTitles[counter + 1];
-    let hexTop = this.hexagonTitles[counter - 8];
-    let hexBottom = this.hexagonTitles[counter + 8];
-
-    if (
-      (hexRight === 'leer' || hexRight === undefined) &&
-      (hexTop === 'leer' || hexTop === undefined) &&
-      (hexBottom === 'leer' || hexBottom === undefined)
-    ) {
-      console.log('ELEMENT HAT KEINE NACHBARN!');
-      return false;
-    }
-    return true;
-  }
-
-  checkRightSideEdgeCases(counter: number) {
-    if (
-      counter === 7 ||
-      counter === 15 ||
-      counter === 23 ||
-      counter === 31 ||
-      counter === 39 ||
-      counter === 47 ||
-      counter === 55 ||
-      counter === 63
-    ) {
-    }
-    let hexLeft = this.hexagonTitles[counter - 1];
-    let hexTop = this.hexagonTitles[counter - 8];
-    let hexBottom = this.hexagonTitles[counter + 8];
-
-    if (
-      (hexLeft === 'leer' || hexLeft === undefined) &&
-      (hexTop === 'leer' || hexTop === undefined) &&
-      (hexBottom === 'leer' || hexBottom === undefined)
-    ) {
-      console.log('ELEMENT HAT KEINE NACHBARN!');
-      return false;
-    }
-    return true;
-  }
-
-  moveHexagonToNeighbour(counter: number) {
-    let tempTitle = this.hexagonTitles[counter];
-    this.hexagonTitles[counter] = 'leer';
-    this.hexagonTitles[counter + 1] = tempTitle;
   }
 
   renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
