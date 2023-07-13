@@ -22,14 +22,11 @@ export class ShowMapComponent implements AfterViewInit {
   gridHeight = 8;
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
-  // default
-  hexagonTitles: HexagonType[][] = Array.from({ length: this.gridWidth }, () =>
-    Array(this.gridHeight).fill('leer')
-  );
-  // availableIndexes = this.hexagonTitles.length;
+  hexagonTitles: HexagonType[][];
 
   constructor(private http: HttpClient) {
     this.getConfig();
+    this.hexagonTitles = new Array(8).fill([]).map(() => Array(8).fill('leer'));
   }
 
   ngAfterViewInit(): void {
@@ -79,6 +76,8 @@ export class ShowMapComponent implements AfterViewInit {
     let count = 0;
     let numberOfIterations = this.findAreaAmount(title);
 
+    // const spiralTraverser = spiral({ start: [0, 2], radius: 1 })
+    //grid.traverse(spiralTraverser)
     while (count < numberOfIterations) {
       const randomIndex1 = Math.floor(Math.random() * this.gridHeight);
       const randomIndex2 = Math.floor(Math.random() * this.gridWidth);
@@ -112,8 +111,18 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   moveHexagon(qCoordinate: number, rCoordinate: number) {
-    console.log('Ein Hexagon wurde verschoben');
+    console.log(
+      'Verschoben: ' +
+        qCoordinate +
+        '/' +
+        rCoordinate +
+        ' --> ' +
+        qCoordinate +
+        '/' +
+        (rCoordinate + 1)
+    );
     let tempTitle = this.hexagonTitles[qCoordinate][rCoordinate];
+    console.log(tempTitle);
     this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
     this.hexagonTitles[qCoordinate][rCoordinate + 1] = tempTitle;
   }
@@ -135,8 +144,7 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   hasHexNeighbours(hex: Hex, grid: Grid<Hex>) {
-    let title =
-      this.hexagonTitles[this.tNegative(hex.q)][this.tNegative(hex.r)];
+    let title = this.hexagonTitles[hex.col][hex.row];
     if (title === 'leer') {
       return;
     }
@@ -144,18 +152,14 @@ export class ShowMapComponent implements AfterViewInit {
     // Directions als Nummern, Enum Konvertion bringt teils Fehler - lazy
     let directionsAsNumber = [1, 2, 3, 4, 5, 6, 7];
     for (const direction of directionsAsNumber) {
-      let nHex = grid.neighborOf(
-        [this.tNegative(hex.q), this.tNegative(hex.r)],
-        direction,
-        {
-          allowOutside: false,
-        }
-      );
+      let nHex = grid.neighborOf([hex.col, hex.row], direction, {
+        allowOutside: false,
+      });
       if (nHex !== undefined) {
         // Achtung, doppelte Verneinung
         // isHexagonValidTarget gibt true zurück falls 'leer'
         let hasNoNeighbour = this.isHexagonValidTarget(
-          this.hexagonTitles[this.tNegative(nHex.q)][this.tNegative(nHex.r)]
+          this.hexagonTitles[hex.col][hex.row]
         );
         if (hasNoNeighbour === false) {
           return;
@@ -163,7 +167,7 @@ export class ShowMapComponent implements AfterViewInit {
       }
     }
 
-    this.moveHexagon(this.tNegative(hex.q), this.tNegative(hex.r));
+    this.moveHexagon(hex.col, hex.row);
     this.hasHexNeighbours(hex, grid);
   }
 
@@ -197,7 +201,7 @@ export class ShowMapComponent implements AfterViewInit {
 
     let counter = 0;
     grid.forEach((hex: Hex) => {
-      this.hasHexNeighbours(hex, grid);
+      // this.hasHexNeighbours(hex, grid);
       const newText = this.renderHex(hex, graphics, counter);
       app.stage.addChild(newText);
       counter++;
@@ -207,16 +211,7 @@ export class ShowMapComponent implements AfterViewInit {
 
   renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
     // Übergebene Titel des Hexagons
-    let qValue = hex.q;
-    let rValue = hex.r;
-    if (hex.q < 0) {
-      qValue = qValue * -1;
-    }
-    if (hex.r < 0) {
-      rValue = qValue * -1;
-    }
-    let title = this.hexagonTitles[qValue][rValue];
-    
+    let title = this.hexagonTitles[hex.col][hex.row];
 
     // Setze den Linienstyle der Hexagons
     this.setHexagonLineStyle(graphics, title);
@@ -228,14 +223,19 @@ export class ShowMapComponent implements AfterViewInit {
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
     // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    let coordinateText = hex.r.toString() + '/' + hex.q.toString();
+    let coordinateText = hex.col.toString() + '/' + hex.row.toString();
     if (title === 'leer') {
-      coordinateText = '';
+      // coordinateText = '';
     }
 
     // Wechseln zwischen Bildern und Koordinaten Ansicht
     // let newSprite = this.createHexagonImage(title, hex);
-    let newSprite = this.createHexagonText(hex, coordinateText, textStyle, counter);
+    let newSprite = this.createHexagonText(
+      hex,
+      coordinateText,
+      textStyle,
+      counter
+    );
 
     return newSprite;
   }
