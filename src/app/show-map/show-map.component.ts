@@ -110,21 +110,40 @@ export class ShowMapComponent implements AfterViewInit {
     }
   }
 
-  moveHexagon(qCoordinate: number, rCoordinate: number) {
+  moveHexagon(
+    qCoordinate: number,
+    rCoordinate: number,
+    hex: Hex,
+    grid: Grid<Hex>
+  ) {
+    qCoordinate = hex.col;
+    rCoordinate = hex.row;
+    let tempTitle = this.hexagonTitles[qCoordinate][rCoordinate];
+    let customOffset = 'NaN';
+
+    if (rCoordinate < 7) {
+      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
+      this.hexagonTitles[qCoordinate][rCoordinate + 1] = tempTitle;
+      customOffset = qCoordinate + '/' + (rCoordinate + 1);
+    } else if (qCoordinate < 7) {
+      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
+      this.hexagonTitles[qCoordinate + 1][rCoordinate] = tempTitle;
+      customOffset = qCoordinate + 1 + '/' + rCoordinate;
+    } else {
+      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
+      this.hexagonTitles[qCoordinate - 1][rCoordinate - 1] = tempTitle;
+      customOffset = qCoordinate - 1 + '/' + (rCoordinate - 1);
+    }
+
     console.log(
-      'Verschoben: ' +
+      tempTitle +
+        ' verschoben: ' +
         qCoordinate +
         '/' +
         rCoordinate +
         ' --> ' +
-        qCoordinate +
-        '/' +
-        (rCoordinate + 1)
+        customOffset
     );
-    let tempTitle = this.hexagonTitles[qCoordinate][rCoordinate];
-    console.log(tempTitle);
-    this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
-    this.hexagonTitles[qCoordinate][rCoordinate + 1] = tempTitle;
   }
 
   findAreaAmount(hexagonTitle: HexagonType): number {
@@ -143,14 +162,11 @@ export class ShowMapComponent implements AfterViewInit {
     return false;
   }
 
-  hasHexNeighbours(hex: Hex, grid: Grid<Hex>) {
+  hasHexNeighbours(hex: Hex, grid: Grid<Hex>): boolean {
     let title = this.hexagonTitles[hex.col][hex.row];
-    if (title === 'leer') {
-      return;
-    }
 
     // Directions als Nummern, Enum Konvertion bringt teils Fehler - lazy
-    let directionsAsNumber = [1, 2, 3, 4, 5, 6, 7];
+    let directionsAsNumber = [0, 1, 2, 3, 4, 5, 6, 7];
     for (const direction of directionsAsNumber) {
       let nHex = grid.neighborOf([hex.col, hex.row], direction, {
         allowOutside: false,
@@ -159,24 +175,17 @@ export class ShowMapComponent implements AfterViewInit {
         // Achtung, doppelte Verneinung
         // isHexagonValidTarget gibt true zurück falls 'leer'
         let hasNoNeighbour = this.isHexagonValidTarget(
-          this.hexagonTitles[hex.col][hex.row]
+          this.hexagonTitles[nHex.col][nHex.row]
         );
         if (hasNoNeighbour === false) {
-          return;
+          return true;
         }
       }
     }
 
-    this.moveHexagon(hex.col, hex.row);
-    this.hasHexNeighbours(hex, grid);
+    return false;
   }
 
-  tNegative(hexValue: number): number {
-    if (hexValue < 0) {
-      return hexValue * -1;
-    }
-    return hexValue;
-  }
   /*
     Hier wird das rendern der Hexagons durchgeführt
     Styling + Textübergabe
@@ -199,9 +208,22 @@ export class ShowMapComponent implements AfterViewInit {
     const graphics = new PIXI.Graphics();
     app.stage.addChild(graphics);
 
+    // let allConnected = false;
+    // while (!allConnected) {
+    //   allConnected = true;
+
+    // }
+
+    grid.forEach((hex: Hex) => {
+      let title = this.hexagonTitles[hex.col][hex.row];
+      if (this.hasHexNeighbours(hex, grid) === false && title !== 'leer') {
+        // allConnected = false;
+        this.moveHexagon(hex.col, hex.row, hex, grid);
+      }
+    });
+
     let counter = 0;
     grid.forEach((hex: Hex) => {
-      // this.hasHexNeighbours(hex, grid);
       const newText = this.renderHex(hex, graphics, counter);
       app.stage.addChild(newText);
       counter++;
