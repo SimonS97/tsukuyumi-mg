@@ -1,5 +1,6 @@
 export enum HexagonType {
   Leer = 'leer',
+  Mondfeld = 'Mondfeld',
   Meeresboden = 'Meeresboden',
   Schwemmland = 'Schwemmland',
   Gebirge = 'Gebirge',
@@ -8,5 +9,4 @@ export enum HexagonType {
   Radioaktiv = 'Radioaktiv',
   Tsukuyumi = 'Tsukuyumi',
   Toxisch = 'Toxisch',
-  Mondfeld = 'Mondfeld'
 }

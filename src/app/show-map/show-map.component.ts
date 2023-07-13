@@ -19,12 +19,14 @@ export class ShowMapComponent implements AfterViewInit {
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
   // Wir benötigen im Default 28 + 8 MondTiles
   gridWidth = 7;
-  gridHeight = 6;
+  gridHeight = 7;
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
   // default
-  hexagonTitles = Array(42).fill('leer');
-  availableIndexes = this.hexagonTitles.length;
+  hexagonTitles: HexagonType[][] = Array.from({ length: this.gridWidth }, () =>
+    Array(this.gridHeight).fill('leer')
+  );
+  // availableIndexes = this.hexagonTitles.length;
 
   constructor(private http: HttpClient) {
     this.getConfig();
@@ -36,11 +38,10 @@ export class ShowMapComponent implements AfterViewInit {
 
   // Hier sollen alle Titel der Hexagons befüllt werden
   generateHexagonTitles() {
-    this.createMondfeld(this.hexagonTitles);
     const areaTypes = Object.values(HexagonType);
     for (const areaType of areaTypes) {
       if (areaType === 'Mondfeld') {
-        return;
+        this.createMondfeld(areaType);
       } else {
         this.createHexagonsByAreaType(areaType);
       }
@@ -74,39 +75,47 @@ export class ShowMapComponent implements AfterViewInit {
     Hier werden die Einzelnen Hexagon-Fälle generiert anhand es ruleSet
   */
 
-  createHexagonsByAreaType(title: HexagonType) {
+  createMondfeld(title: HexagonType) {
     let count = 0;
     let numberOfIterations = this.findAreaAmount(title);
 
     while (count < numberOfIterations) {
-      const randomIndex = Math.floor(Math.random() * this.availableIndexes);
-      if (this.isHexagonValidTarget(this.hexagonTitles[randomIndex])) {
-        this.hexagonTitles[randomIndex] = title;
+      const randomIndex1 = Math.floor(Math.random() * this.gridHeight);
+      const randomIndex2 = Math.floor(Math.random() * this.gridWidth);
+      if (
+        this.isHexagonValidTarget(
+          this.hexagonTitles[randomIndex1][randomIndex2]
+        )
+      ) {
+        this.hexagonTitles[randomIndex1][randomIndex2] = title;
         count++;
       }
     }
   }
 
-  createMondfeld(array: any) {
-    const gridWidth = 7; // Breite des Grids
-    const gridHeight = 6; // Höhe des Grids
-    const mondIndices = [0, 1, 8, 15, 14, 6, 7]; // Indizes des Mondfelds
-    const randomizedArray = [...array]; // Erstelle eine Kopie des Arrays, um das ursprüngliche Array nicht zu verändern
+  createHexagonsByAreaType(title: HexagonType) {
+    let count = 0;
+    let numberOfIterations = this.findAreaAmount(title);
 
-    // Wähle eine zufällige obere linke Ecke für das Mondfeld
-    const randomRow = Math.floor(Math.random() * (gridHeight - 2)); // Zufällige Zeile (Höhe - 2, um das Mondfeld in das Grid passen zu lassen)
-    const randomCol = Math.floor(Math.random() * (gridWidth - 3)); // Zufällige Spalte (Breite - 3, um das Mondfeld in das Grid passen zu lassen)
-    const startIndex = randomRow * gridWidth + randomCol;
-
-    // Platziere das Mondfeld in das Grid
-    for (let i = 0; i < mondIndices.length; i++) {
-      const rowOffset = Math.floor(mondIndices[i] / gridWidth);
-      const colOffset = mondIndices[i] % gridWidth;
-      const gridIndex = startIndex + rowOffset * gridWidth + colOffset;
-      randomizedArray[gridIndex] = 'Mondfeld';
+    while (count < numberOfIterations) {
+      const randomIndex1 = Math.floor(Math.random() * this.gridHeight);
+      const randomIndex2 = Math.floor(Math.random() * this.gridWidth);
+      if (
+        this.isHexagonValidTarget(
+          this.hexagonTitles[randomIndex1][randomIndex2]
+        )
+      ) {
+        this.hexagonTitles[randomIndex1][randomIndex2] = title;
+        count++;
+      }
     }
+  }
 
-    this.hexagonTitles = randomizedArray;
+  moveHexagon(qCoordinate: number, rCoordinate: number) {
+    console.log('Ein Hexagon wurde verschoben');
+    let tempTitle = this.hexagonTitles[qCoordinate][rCoordinate];
+    this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
+    this.hexagonTitles[qCoordinate][rCoordinate + 1] = tempTitle;
   }
 
   findAreaAmount(hexagonTitle: HexagonType): number {
@@ -125,6 +134,45 @@ export class ShowMapComponent implements AfterViewInit {
     return false;
   }
 
+  hasHexNeighbours(hex: Hex, grid: Grid<Hex>) {
+    let title =
+      this.hexagonTitles[this.tNegative(hex.q)][this.tNegative(hex.r)];
+    if (title === 'leer') {
+      return;
+    }
+
+    const directions = Object.values(Direction);
+    let test = [1, 2, 3, 4, 5, 6, 7];
+    for (const direction of test) {
+      let nHex = grid.neighborOf(
+        [this.tNegative(hex.q), this.tNegative(hex.r)],
+        direction,
+        {
+          allowOutside: false,
+        }
+      );
+      if (nHex !== undefined) {
+        // Achtung, doppelte Verneinung
+        // isHexagonValidTarget gibt true zurück falls 'leer'
+        let hasNoNeighbour = this.isHexagonValidTarget(
+          this.hexagonTitles[this.tNegative(nHex.q)][this.tNegative(nHex.r)]
+        );
+        if (hasNoNeighbour === false) {
+          return;
+        }
+      }
+    }
+
+    this.moveHexagon(this.tNegative(hex.q), this.tNegative(hex.r));
+    this.hasHexNeighbours(hex, grid);
+  }
+
+  tNegative(hexValue: number): number {
+    if (hexValue < 0) {
+      return hexValue * -1;
+    }
+    return hexValue;
+  }
   /*
     Hier wird das rendern der Hexagons durchgeführt
     Styling + Textübergabe
@@ -150,6 +198,7 @@ export class ShowMapComponent implements AfterViewInit {
     let counter = 0;
     grid.forEach((hex: Hex) => {
       const newText = this.renderHex(hex, graphics, counter);
+      this.hasHexNeighbours(hex, grid);
       app.stage.addChild(newText);
       counter++;
     });
@@ -158,7 +207,15 @@ export class ShowMapComponent implements AfterViewInit {
 
   renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
     // Übergebene Titel des Hexagons
-    let title = this.hexagonTitles[counter];
+    let qValue = hex.q;
+    let rValue = hex.r;
+    if (hex.q < 0) {
+      qValue = qValue * -1;
+    }
+    if (hex.r < 0) {
+      rValue = qValue * -1;
+    }
+    let title = this.hexagonTitles[qValue][rValue];
 
     // Setze den Linienstyle der Hexagons
     // this.setHexagonLineStyle(graphics, title);
