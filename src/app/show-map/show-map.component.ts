@@ -18,8 +18,8 @@ export class ShowMapComponent implements AfterViewInit {
   // Tatsächlichen Dimensionen des Grids
   // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
   // Wir benötigen im Default 28 + 8 MondTiles
-  gridWidth = 7;
-  gridHeight = 7;
+  gridWidth = 8;
+  gridHeight = 8;
   ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
   configUrl = 'assets/rules.json';
   // default
@@ -141,9 +141,9 @@ export class ShowMapComponent implements AfterViewInit {
       return;
     }
 
-    const directions = Object.values(Direction);
-    let test = [1, 2, 3, 4, 5, 6, 7];
-    for (const direction of test) {
+    // Directions als Nummern, Enum Konvertion bringt teils Fehler - lazy
+    let directionsAsNumber = [1, 2, 3, 4, 5, 6, 7];
+    for (const direction of directionsAsNumber) {
       let nHex = grid.neighborOf(
         [this.tNegative(hex.q), this.tNegative(hex.r)],
         direction,
@@ -197,8 +197,8 @@ export class ShowMapComponent implements AfterViewInit {
 
     let counter = 0;
     grid.forEach((hex: Hex) => {
-      const newText = this.renderHex(hex, graphics, counter);
       this.hasHexNeighbours(hex, grid);
+      const newText = this.renderHex(hex, graphics, counter);
       app.stage.addChild(newText);
       counter++;
     });
@@ -216,9 +216,10 @@ export class ShowMapComponent implements AfterViewInit {
       rValue = qValue * -1;
     }
     let title = this.hexagonTitles[qValue][rValue];
+    
 
     // Setze den Linienstyle der Hexagons
-    // this.setHexagonLineStyle(graphics, title);
+    this.setHexagonLineStyle(graphics, title);
     // graphics.lineStyle(1, '#ffffff', 0.5);
 
     // Ermittle den Textstyle, falls benötigt
@@ -233,8 +234,8 @@ export class ShowMapComponent implements AfterViewInit {
     }
 
     // Wechseln zwischen Bildern und Koordinaten Ansicht
-    let newSprite = this.createHexagonImage(title, hex);
-    // let newSprite = this.createHexagonText(hex, title, textStyle, counter);
+    // let newSprite = this.createHexagonImage(title, hex);
+    let newSprite = this.createHexagonText(hex, coordinateText, textStyle, counter);
 
     return newSprite;
   }
@@ -245,7 +246,7 @@ export class ShowMapComponent implements AfterViewInit {
     textStyle: any,
     arrayIndex: number
   ) {
-    const text = new PIXI.Text(arrayIndex, textStyle);
+    const text = new PIXI.Text(title, textStyle);
     text.anchor.set(0.5);
     text.x = hex.x;
     text.y = hex.y;
