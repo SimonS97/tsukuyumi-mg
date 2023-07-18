@@ -163,23 +163,47 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   hasHexNeighbours(hex: Hex, grid: Grid<Hex>): boolean {
-    let title = this.hexagonTitles[hex.col][hex.row];
+    const n = this.hexagonTitles.length; // Anzahl der Zeilen
+    const m = this.hexagonTitles[0].length; // Anzahl der Spalten
 
-    // Directions als Nummern, Enum Konvertion bringt teils Fehler - lazy
-    let directionsAsNumber = [0, 1, 2, 3, 4, 5, 6, 7];
-    for (const direction of directionsAsNumber) {
-      let nHex = grid.neighborOf([hex.col, hex.row], direction, {
-        allowOutside: false,
-      });
-      if (nHex !== undefined) {
-        // Achtung, doppelte Verneinung
-        // isHexagonValidTarget gibt true zurück falls 'leer'
-        let hasNoNeighbour = this.isHexagonValidTarget(
-          this.hexagonTitles[nHex.col][nHex.row]
-        );
-        if (hasNoNeighbour === false) {
-          return true;
-        }
+    if (
+      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
+      hex.row > 0 &&
+      hex.row < m - 1
+    ) {
+      if (
+        this.hexagonTitles[hex.col][hex.row - 1] !== 'leer' ||
+        this.hexagonTitles[hex.col][hex.row + 1] !== 'leer'
+      ) {
+        return true;
+      }
+    }
+    if (
+      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
+      hex.col > 0 &&
+      hex.col < n - 1
+    ) {
+      if (
+        this.hexagonTitles[hex.col - 1][hex.row] !== 'leer' ||
+        this.hexagonTitles[hex.col + 1][hex.row] !== 'leer'
+      ) {
+        return true;
+      }
+    }
+    if (
+      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
+      hex.col > 0 &&
+      hex.col < n - 1 &&
+      hex.row > 0 &&
+      hex.row < m - 1
+    ) {
+      if (
+        this.hexagonTitles[hex.col - 1][hex.row + 1] !== 'leer' ||
+        this.hexagonTitles[hex.col + 1][hex.row - 1] !== 'leer' ||
+        this.hexagonTitles[hex.col - 1][hex.row - 1] !== 'leer' ||
+        this.hexagonTitles[hex.col + 1][hex.row + 1] !== 'leer'
+      ) {
+        return true;
       }
     }
 
