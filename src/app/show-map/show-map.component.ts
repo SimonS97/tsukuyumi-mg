@@ -1,6 +1,13 @@
 import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import * as PIXI from 'pixi.js';
-import { defineHex, Grid, rectangle, Direction, Hex } from 'honeycomb-grid';
+import {
+  defineHex,
+  Grid,
+  rectangle,
+  Direction,
+  Hex,
+  offsetToCubePointy,
+} from 'honeycomb-grid';
 import { HttpClient } from '@angular/common/http';
 import { Maprules } from '../maprules';
 import { HexagonType } from '../hexagon-type';
@@ -110,39 +117,26 @@ export class ShowMapComponent implements AfterViewInit {
     }
   }
 
-  moveHexagon(
-    qCoordinate: number,
-    rCoordinate: number,
-    hex: Hex,
-    grid: Grid<Hex>
-  ) {
-    qCoordinate = hex.col;
-    rCoordinate = hex.row;
-    let tempTitle = this.hexagonTitles[qCoordinate][rCoordinate];
+  moveHexagon(col: number, row: number) {
+    let tempTitle = this.hexagonTitles[col][row];
     let customOffset = 'NaN';
 
-    if (rCoordinate < 7) {
-      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
-      this.hexagonTitles[qCoordinate][rCoordinate + 1] = tempTitle;
-      customOffset = qCoordinate + '/' + (rCoordinate + 1);
-    } else if (qCoordinate < 7) {
-      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
-      this.hexagonTitles[qCoordinate + 1][rCoordinate] = tempTitle;
-      customOffset = qCoordinate + 1 + '/' + rCoordinate;
+    if (row < 7) {
+      this.hexagonTitles[col][row] = HexagonType.Leer;
+      this.hexagonTitles[col][row + 1] = tempTitle;
+      customOffset = col + '/' + (row + 1);
+    } else if (col < 7) {
+      this.hexagonTitles[col][row] = HexagonType.Leer;
+      this.hexagonTitles[col + 1][row] = tempTitle;
+      customOffset = col + 1 + '/' + row;
     } else {
-      this.hexagonTitles[qCoordinate][rCoordinate] = HexagonType.Leer;
-      this.hexagonTitles[qCoordinate - 1][rCoordinate - 1] = tempTitle;
-      customOffset = qCoordinate - 1 + '/' + (rCoordinate - 1);
+      this.hexagonTitles[col][row] = HexagonType.Leer;
+      this.hexagonTitles[col - 1][row - 1] = tempTitle;
+      customOffset = col - 1 + '/' + (row - 1);
     }
 
     console.log(
-      tempTitle +
-        ' verschoben: ' +
-        qCoordinate +
-        '/' +
-        rCoordinate +
-        ' --> ' +
-        customOffset
+      tempTitle + ' verschoben: ' + col + '/' + row + ' --> ' + customOffset
     );
   }
 
@@ -163,45 +157,25 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   hasHexNeighbours(hex: Hex, grid: Grid<Hex>): boolean {
-    const n = this.hexagonTitles.length; // Anzahl der Zeilen
-    const m = this.hexagonTitles[0].length; // Anzahl der Spalten
+    let directions: Direction[] = [
+      Direction.N,
+      Direction.NE,
+      Direction.E,
+      Direction.SE,
+      Direction.S,
+      Direction.SW,
+      Direction.W,
+    ];
 
-    if (
-      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
-      hex.row > 0 &&
-      hex.row < m - 1
-    ) {
+    for (let direction in directions) {
+      let foundHex = grid.neighborOf(hex, Number(direction), {
+        allowOutside: false,
+      });
       if (
-        this.hexagonTitles[hex.col][hex.row - 1] !== 'leer' ||
-        this.hexagonTitles[hex.col][hex.row + 1] !== 'leer'
-      ) {
-        return true;
-      }
-    }
-    if (
-      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
-      hex.col > 0 &&
-      hex.col < n - 1
-    ) {
-      if (
-        this.hexagonTitles[hex.col - 1][hex.row] !== 'leer' ||
-        this.hexagonTitles[hex.col + 1][hex.row] !== 'leer'
-      ) {
-        return true;
-      }
-    }
-    if (
-      this.hexagonTitles[hex.col][hex.row] !== 'leer' &&
-      hex.col > 0 &&
-      hex.col < n - 1 &&
-      hex.row > 0 &&
-      hex.row < m - 1
-    ) {
-      if (
-        this.hexagonTitles[hex.col - 1][hex.row + 1] !== 'leer' ||
-        this.hexagonTitles[hex.col + 1][hex.row - 1] !== 'leer' ||
-        this.hexagonTitles[hex.col - 1][hex.row - 1] !== 'leer' ||
-        this.hexagonTitles[hex.col + 1][hex.row + 1] !== 'leer'
+        foundHex !== undefined &&
+        this.isHexagonValidTarget(
+          this.hexagonTitles[foundHex.col][foundHex.row]
+        ) === false
       ) {
         return true;
       }
@@ -232,17 +206,14 @@ export class ShowMapComponent implements AfterViewInit {
     const graphics = new PIXI.Graphics();
     app.stage.addChild(graphics);
 
-    // let allConnected = false;
-    // while (!allConnected) {
-    //   allConnected = true;
-
-    // }
+    grid.forEach((hex) => {
+      offsetToCubePointy(hex.q, hex.r, hex.offset);
+    });
 
     grid.forEach((hex: Hex) => {
       let title = this.hexagonTitles[hex.col][hex.row];
-      if (this.hasHexNeighbours(hex, grid) === false && title !== 'leer') {
-        // allConnected = false;
-        this.moveHexagon(hex.col, hex.row, hex, grid);
+      if (title !== 'leer' && this.hasHexNeighbours(hex, grid) === false) {
+        this.moveHexagon(hex.col, hex.row);
       }
     });
 
@@ -269,7 +240,9 @@ export class ShowMapComponent implements AfterViewInit {
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
     // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    let coordinateText = hex.col.toString() + '/' + hex.row.toString();
+    // let coordinateText = hex.col.toString() + '/' + hex.row.toString();
+    let coordinateText =
+      hex.q.toString() + '/' + hex.r.toString() + '/' + hex.s.toString();
     if (title === 'leer') {
       // coordinateText = '';
     }
