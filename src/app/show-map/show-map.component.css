@@ -1,7 +1,50 @@
 /* show-map.component.css */
 
 canvas {
-  width: 100%;
-  height: 1000px; /* Passe die Höhe nach Bedarf an */
-  border: 1px solid #ccc; /* Rahmen, um das Canvas sichtbar zu machen */
+  /* border: 1px solid #ccc; */
+  margin-top: 20px;
+}
+
+.refresh-button {
+  font-size: 24px;
+  padding: 10px 20px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.refresh-button:hover {
+  background-color: #1976d2;
+}
+
+.refresh-button:focus {
+  outline: none;
+}
+
+.refresh-button:active {
+  background-color: #0d47a1;
+}
+
+.home-button{
+  font-size: 24px;
+  padding: 10px 20px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.home-button:hover {
+  background-color: #902923;
+}
+
+.home-button:focus {
+  outline: none;
+}
+
+.home-button:active {
+  background-color: #902923;
 }

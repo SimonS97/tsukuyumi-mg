@@ -1,2 +1,21 @@
-<h1>Show Map</h1>
-<canvas #pixiCanvas></canvas>
+<div class="main-wrapper">
+  <canvas #pixiCanvas></canvas>
+  <div class="d-flex flex-row justify-content-center">
+    <button
+      (click)="refreshGrid()"
+      mat-raised-button
+      color="primary"
+      class="refresh-button"
+    >
+      Randomisieren
+    </button>
+    <button
+      [routerLink]="['']"
+      mat-raised-button
+      color="warn"
+      class="home-button"
+    >
+      Zurück
+    </button>
+  </div>
+</div>

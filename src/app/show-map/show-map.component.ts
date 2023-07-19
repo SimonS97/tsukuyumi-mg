@@ -15,7 +15,8 @@ import { HexagonType } from '../hexagon-type';
 
 @Component({
   selector: 'app-show-map',
-  template: '<canvas #pixiCanvas></canvas>',
+  // template: '<canvas #pixiCanvas></canvas>',
+  templateUrl: './show-map.component.html',
   styleUrls: ['./show-map.component.css'],
 })
 export class ShowMapComponent implements AfterViewInit {
@@ -72,6 +73,7 @@ export class ShowMapComponent implements AfterViewInit {
     if (randomIndex1 === 6 && randomIndex2 === 3) {
       randomIndex1 = 5;
     }
+    console.log('Mondfeld Korrdinaten:' + randomIndex1 + '|' + randomIndex2);
 
     const spiralTraverser = spiral({
       start: [randomIndex1, randomIndex2],
@@ -99,13 +101,10 @@ export class ShowMapComponent implements AfterViewInit {
           titleSetCorrectly = true;
         }
         if (randomIndex1 <= this.gridHeight - 2) {
-          console.log('q: ' + randomIndex1);
           randomIndex1++;
         } else if (randomIndex2 <= this.gridWidth - 2) {
-          console.log('r: ' + randomIndex1);
           randomIndex2++;
         } else {
-          console.log('neg: ' + randomIndex1);
           randomIndex1 = 0;
           randomIndex2 = 0;
         }
@@ -185,6 +184,13 @@ export class ShowMapComponent implements AfterViewInit {
     Styling + Textübergabe
   */
 
+  refreshGrid() {
+    this.hexagonTitles = this.hexagonTitles = new Array(8)
+      .fill([])
+      .map(() => Array(8).fill('leer'));
+    this.createHexagonDrawing();
+  }
+
   createHexagonDrawing() {
     const Hex = defineHex({
       dimensions: this.hexagonSize,
@@ -209,6 +215,8 @@ export class ShowMapComponent implements AfterViewInit {
     }
 
     const app = new PIXI.Application({
+      resolution: window.devicePixelRatio,
+      antialias: true,
       backgroundAlpha: 0,
       view: this.pixiCanvas.nativeElement,
     });
@@ -236,7 +244,7 @@ export class ShowMapComponent implements AfterViewInit {
     let title = this.hexagonTitles[hex.col][hex.row];
 
     // Setze den Linienstyle der Hexagons
-    this.setHexagonLineStyle(graphics, title);
+    // this.setHexagonLineStyle(graphics, title);
     // graphics.lineStyle(1, '#ffffff', 0.5);
 
     // Ermittle den Textstyle, falls benötigt
