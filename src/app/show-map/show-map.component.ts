@@ -7,6 +7,7 @@ import {
   Direction,
   Hex,
   offsetToCubePointy,
+  spiral,
 } from 'honeycomb-grid';
 import { HttpClient } from '@angular/common/http';
 import { Maprules } from '../maprules';
@@ -40,18 +41,6 @@ export class ShowMapComponent implements AfterViewInit {
     this.generateConfig();
   }
 
-  // Hier sollen alle Titel der Hexagons befüllt werden
-  generateHexagonTitles() {
-    const areaTypes = Object.values(HexagonType);
-    for (const areaType of areaTypes) {
-      if (areaType === 'Mondfeld') {
-        this.createMondfeld(areaType);
-      } else {
-        this.createHexagonsByAreaType(areaType);
-      }
-    }
-  }
-
   getConfig() {
     return this.http.get<Maprules>(this.configUrl);
   }
@@ -68,8 +57,6 @@ export class ShowMapComponent implements AfterViewInit {
         console.log(this.ruleSet);
       },
       complete: () => {
-        // Hier werden die Schritte nach und nach im Anschluss der Config ausgeführt!
-        this.generateHexagonTitles();
         this.createHexagonDrawing();
       },
     });
@@ -79,24 +66,20 @@ export class ShowMapComponent implements AfterViewInit {
     Hier werden die Einzelnen Hexagon-Fälle generiert anhand es ruleSet
   */
 
-  createMondfeld(title: HexagonType) {
-    let count = 0;
-    let numberOfIterations = this.findAreaAmount(title);
-
-    // const spiralTraverser = spiral({ start: [0, 2], radius: 1 })
-    //grid.traverse(spiralTraverser)
-    while (count < numberOfIterations) {
-      const randomIndex1 = Math.floor(Math.random() * this.gridHeight);
-      const randomIndex2 = Math.floor(Math.random() * this.gridWidth);
-      if (
-        this.isHexagonValidTarget(
-          this.hexagonTitles[randomIndex1][randomIndex2]
-        )
-      ) {
-        this.hexagonTitles[randomIndex1][randomIndex2] = title;
-        count++;
-      }
+  createMondfeld(title: HexagonType, grid: Grid<Hex>) {
+    let randomIndex1 = Math.floor(Math.random() * 6) + 1;
+    let randomIndex2 = Math.floor(Math.random() * 6) + 1;
+    if (randomIndex1 === 6 && randomIndex2 === 3) {
+      randomIndex1 = 5;
     }
+
+    const spiralTraverser = spiral({
+      start: [randomIndex1, randomIndex2],
+      radius: 1,
+    });
+    grid.traverse(spiralTraverser).forEach((hex) => {
+      this.hexagonTitles[hex.col][hex.row] = HexagonType.Mondfeld;
+    });
   }
 
   createHexagonsByAreaType(title: HexagonType) {
@@ -104,15 +87,28 @@ export class ShowMapComponent implements AfterViewInit {
     let numberOfIterations = this.findAreaAmount(title);
 
     while (count < numberOfIterations) {
-      const randomIndex1 = Math.floor(Math.random() * this.gridHeight);
-      const randomIndex2 = Math.floor(Math.random() * this.gridWidth);
-      if (
-        this.isHexagonValidTarget(
-          this.hexagonTitles[randomIndex1][randomIndex2]
-        )
-      ) {
-        this.hexagonTitles[randomIndex1][randomIndex2] = title;
-        count++;
+      let randomIndex1 = Math.floor(Math.random() * this.gridHeight);
+      let randomIndex2 = Math.floor(Math.random() * this.gridWidth);
+
+      let titleSetCorrectly = false;
+      while (titleSetCorrectly === false) {
+        let tempTitle = this.hexagonTitles[randomIndex1][randomIndex2];
+        if (this.isHexagonValidTarget(tempTitle)) {
+          this.hexagonTitles[randomIndex1][randomIndex2] = title;
+          count++;
+          titleSetCorrectly = true;
+        }
+        if (randomIndex1 <= this.gridHeight - 2) {
+          console.log('q: ' + randomIndex1);
+          randomIndex1++;
+        } else if (randomIndex2 <= this.gridWidth - 2) {
+          console.log('r: ' + randomIndex1);
+          randomIndex2++;
+        } else {
+          console.log('neg: ' + randomIndex1);
+          randomIndex1 = 0;
+          randomIndex2 = 0;
+        }
       }
     }
   }
@@ -199,16 +195,25 @@ export class ShowMapComponent implements AfterViewInit {
       rectangle({ width: this.gridWidth, height: this.gridHeight })
     );
 
+    grid.forEach((hex) => {
+      offsetToCubePointy(hex.q, hex.r, hex.offset);
+    });
+
+    const areaTypes = Object.values(HexagonType);
+    for (const areaType of areaTypes) {
+      if (areaType === 'Mondfeld') {
+        this.createMondfeld(HexagonType.Mondfeld, grid);
+      } else {
+        this.createHexagonsByAreaType(areaType);
+      }
+    }
+
     const app = new PIXI.Application({
       backgroundAlpha: 0,
       view: this.pixiCanvas.nativeElement,
     });
     const graphics = new PIXI.Graphics();
     app.stage.addChild(graphics);
-
-    grid.forEach((hex) => {
-      offsetToCubePointy(hex.q, hex.r, hex.offset);
-    });
 
     grid.forEach((hex: Hex) => {
       let title = this.hexagonTitles[hex.col][hex.row];
@@ -240,21 +245,21 @@ export class ShowMapComponent implements AfterViewInit {
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
     // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    // let coordinateText = hex.col.toString() + '/' + hex.row.toString();
-    let coordinateText =
-      hex.q.toString() + '/' + hex.r.toString() + '/' + hex.s.toString();
+    let coordinateText = hex.col.toString() + '/' + hex.row.toString();
+    // let coordinateText =
+    //   hex.q.toString() + '/' + hex.r.toString() + '/' + hex.s.toString();
     if (title === 'leer') {
       // coordinateText = '';
     }
 
     // Wechseln zwischen Bildern und Koordinaten Ansicht
-    // let newSprite = this.createHexagonImage(title, hex);
-    let newSprite = this.createHexagonText(
-      hex,
-      coordinateText,
-      textStyle,
-      counter
-    );
+    let newSprite = this.createHexagonImage(title, hex);
+    // let newSprite = this.createHexagonText(
+    //   hex,
+    //   coordinateText,
+    //   textStyle,
+    //   counter
+    // );
 
     return newSprite;
   }
