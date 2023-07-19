@@ -23,9 +23,9 @@ export class ShowMapComponent implements AfterViewInit {
   @ViewChild('pixiCanvas', { static: true })
   pixiCanvas!: ElementRef<HTMLCanvasElement>;
   hexagonSize = 45;
-  hexagonOrigin = 'topLeft'; // 'center' if you want the center to be the origin
+  hexagonOrigin = 'topLeft';
   // Tatsächlichen Dimensionen des Grids
-  // gridWidth * gridHeight = Anzahl Hexagons sollte immer 28 sein
+  // gridWidth * gridHeight = Anzahl Hexagons sollte immer mindestens 28 sein
   // Wir benötigen im Default 28 + 8 MondTiles
   gridWidth = 8;
   gridHeight = 8;
@@ -35,7 +35,9 @@ export class ShowMapComponent implements AfterViewInit {
 
   constructor(private http: HttpClient) {
     this.getConfig();
-    this.hexagonTitles = new Array(8).fill([]).map(() => Array(8).fill('leer'));
+    this.hexagonTitles = new Array(this.gridWidth)
+      .fill([])
+      .map(() => Array(this.gridHeight).fill('leer'));
   }
 
   ngAfterViewInit(): void {
@@ -185,9 +187,9 @@ export class ShowMapComponent implements AfterViewInit {
   */
 
   refreshGrid() {
-    this.hexagonTitles = this.hexagonTitles = new Array(8)
+    this.hexagonTitles = this.hexagonTitles = new Array(this.gridWidth)
       .fill([])
-      .map(() => Array(8).fill('leer'));
+      .map(() => Array(this.gridHeight).fill('leer'));
     this.createHexagonDrawing();
   }
 
