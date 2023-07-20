@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ConfigService } from '../config.service';
+import { Areatype } from '../areatype';
 
 @Component({
   selector: 'app-tsukuyumi-config-options',
@@ -8,16 +9,45 @@ import { ConfigService } from '../config.service';
   styleUrls: ['./tsukuyumi-config-options.component.css'],
 })
 export class TsukuyumiConfigOptionsComponent {
-  maxSliderValue = 7;
+  defaultMaxSliderValue = 8;
+  defaultMinSliderValue = 0;
 
   constructor(private configService: ConfigService) {}
 
-  mondfeldExists(event: MatCheckboxChange) {
+  setMondfeld(event: MatCheckboxChange) {
     this.configService.rules.hasMoon = event.checked;
   }
 
   getMondfeldValue() {
     return this.configService.rules.hasMoon;
+  }
+
+  getHexagonType(): Areatype[] {
+    return this.configService.rules.areaType;
+  }
+
+  getAreaValue(areaValue: string): number {
+    const foundArea = this.configService.rules.areaType.find(
+      (area) => area.title === areaValue
+    );
+    return foundArea?.requiredAmount!;
+  }
+
+  changeAreaValue(areaTitle: string, sliderValue: string) {
+    const areaObj = this.configService.rules.areaType.find(
+      (area) => area.title === areaTitle
+    );
+
+    if (areaObj) {
+      const index = this.configService.rules.areaType.indexOf(areaObj);
+
+      if (index !== -1) {
+        this.configService.rules.areaType[index] = {
+          ...areaObj,
+          requiredAmount: parseInt(sliderValue, 10),
+        };
+      }
+    }
   }
 
   getAllAvailableAreas(): number {
@@ -26,77 +56,5 @@ export class TsukuyumiConfigOptionsComponent {
       amount += area.requiredAmount;
     });
     return amount;
-  }
-
-  getSchwemmlandValue(): number {
-    const schwemmlandObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Schwemmland'
-    );
-    return schwemmlandObj?.requiredAmount!;
-  }
-
-  getGebirgeValue(): number {
-    const gebirgeObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Gebirge'
-    );
-    return gebirgeObj?.requiredAmount!;
-  }
-
-  getMeeresbodenValue(): number {
-    const meeresbodenObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Meeresboden'
-    );
-    return meeresbodenObj?.requiredAmount!;
-  }
-
-  changeSchwemmlandValue(sliderValue: string) {
-    const schwemmlandObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Schwemmland'
-    );
-
-    if (schwemmlandObj) {
-      const index = this.configService.rules.areaType.indexOf(schwemmlandObj);
-
-      if (index !== -1) {
-        this.configService.rules.areaType[index] = {
-          ...schwemmlandObj,
-          requiredAmount: parseInt(sliderValue, 10),
-        };
-      }
-    }
-  }
-
-  changeGebirgeValue(sliderValue: string) {
-    const gebirgeObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Gebirge'
-    );
-
-    if (gebirgeObj) {
-      const index = this.configService.rules.areaType.indexOf(gebirgeObj);
-
-      if (index !== -1) {
-        this.configService.rules.areaType[index] = {
-          ...gebirgeObj,
-          requiredAmount: parseInt(sliderValue, 10),
-        };
-      }
-    }
-  }
-
-  changeMeeresbodenValue(sliderValue: string) {
-    const gebirgeObj = this.configService.rules.areaType.find(
-      (area) => area.title === 'Meeresboden'
-    );
-
-    if (gebirgeObj) {
-      const index = this.configService.rules.areaType.indexOf(gebirgeObj);
-
-      if (index !== -1) {
-        this.configService.rules.areaType[index] = {
-          ...gebirgeObj,
-          requiredAmount: parseInt(sliderValue, 10),
-        };
-      }
-    }
   }
 }

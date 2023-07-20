@@ -7,55 +7,24 @@
       <div class="config-section">
         <mat-checkbox
           [checked]="getMondfeldValue()"
-          (change)="mondfeldExists($event)"
+          (change)="setMondfeld($event)"
           >Besitzt Mondfeld</mat-checkbox
         >
       </div>
-
-      <div class="slider-container">
+      <div *ngFor="let area of getHexagonType()" class="slider-container">
         <label class="slider-label"
-          >Schwemmland: {{ getSchwemmlandValue() }}</label
+          >{{ area.title }}: {{ getAreaValue(area.title) }}</label
         >
         <mat-slider
           class="custom-slider"
-          [max]="maxSliderValue"
-          [min]="0"
-          [step]="1"
+          [max]="area.requiredAmount"
+          [max]="area.maxAmount || defaultMaxSliderValue"
+          [min]="area.minAmount || defaultMinSliderValue"
           [discrete]="true"
           [showTickMarks]="true"
-          (change)="changeSchwemmlandValue(schwemmlandSlider.value)"
+          (change)="changeAreaValue(area.title, areaSlider.value)"
         >
-          <input matSliderThumb #schwemmlandSlider />
-        </mat-slider>
-      </div>
-      <div class="slider-container">
-        <label class="slider-label">Gebirge: {{ getGebirgeValue() }}</label>
-        <mat-slider
-          class="custom-slider"
-          [max]="maxSliderValue"
-          [min]="0"
-          [step]="1"
-          [discrete]="true"
-          [showTickMarks]="true"
-          (change)="changeGebirgeValue(gebirgeSlider.value)"
-        >
-          <input matSliderThumb #gebirgeSlider />
-        </mat-slider>
-      </div>
-      <div class="slider-container">
-        <label class="slider-label"
-          >Meeresboden: {{ getMeeresbodenValue() }}</label
-        >
-        <mat-slider
-          class="custom-slider"
-          [max]="25"
-          [min]="0"
-          [step]="1"
-          [discrete]="true"
-          [showTickMarks]="true"
-          (change)="changeMeeresbodenValue(meeresbodenSlider.value)"
-        >
-          <input matSliderThumb #meeresbodenSlider />
+          <input matSliderThumb #areaSlider />
         </mat-slider>
       </div>
     </mat-card-content>

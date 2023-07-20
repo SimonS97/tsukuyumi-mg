@@ -1,44 +1,48 @@
 <div class="container">
-  <div class="d-flex flex-row justify-content-center">
-    <h1>{{ title }}</h1>
+  <div class="main-content align-self-center">
+    <div class="d-flex flex-row justify-content-center">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="d-flex flex-row justify-content-center">
+      <mat-form-field>
+        <mat-select
+          [(value)]="gameToPlay"
+          (selectionChange)="selectGame($event)"
+        >
+          <mat-label>Spielauswahl</mat-label>
+          <mat-option value="Tsukuyumi">Tsukuyumi</mat-option>
+          <mat-option value="SiedlerVonCatan">Siedler von Catan</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="d-flex flex-row justify-content-center">
+      <mat-form-field>
+        <mat-select (selectionChange)="selectPlayer($event)">
+          <mat-label>Anz. Spieler</mat-label>
+          <mat-option value="2">2</mat-option>
+          <mat-option value="3">3</mat-option>
+          <mat-option value="4">4</mat-option>
+          <mat-option value="5">5</mat-option>
+          <mat-option value="6">6</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="d-flex flex-row justify-content-center">
+      <mat-checkbox
+        [checked]="defaultSettings"
+        (change)="isDefaultSetting($event)"
+        >Default Settings</mat-checkbox
+      >
+    </div>
+    <div class="d-flex flex-row justify-content-center">
+      <button routerLink="/show-map" mat-raised-button color="primary">
+        Map Generieren!
+      </button>
+    </div>
   </div>
-  <div class="d-flex flex-row justify-content-center">
-    <mat-form-field>
-      <mat-select [(value)]="gameToPlay" (selectionChange)="selectGame($event)">
-        <mat-label>Spielauswahl</mat-label>
-        <mat-option value="Tsukuyumi">Tsukuyumi</mat-option>
-        <mat-option value="SiedlerVonCatan">Siedler von Catan</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-  <div class="d-flex flex-row justify-content-center">
-    <mat-form-field>
-      <mat-select (selectionChange)="selectPlayer($event)">
-        <mat-label>Anz. Spieler</mat-label>
-        <mat-option value="2">2</mat-option>
-        <mat-option value="3">3</mat-option>
-        <mat-option value="4">4</mat-option>
-        <mat-option value="5">5</mat-option>
-        <mat-option value="6">6</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-  <div class="d-flex flex-row justify-content-center">
-    <mat-checkbox
-      [checked]="defaultSettings"
-      (change)="isDefaultSetting($event)"
-      >Default Settings</mat-checkbox
-    >
-  </div>
-  <div class="d-flex flex-row justify-content-center">
+  <div class="config-options-container">
     <app-tsukuyumi-config-options
       *ngIf="!defaultSettings"
     ></app-tsukuyumi-config-options>
-  </div>
-
-  <div class="d-flex flex-row justify-content-center">
-    <button routerLink="/show-map" mat-raised-button color="primary">
-      Map Generieren!
-    </button>
   </div>
 </div>
