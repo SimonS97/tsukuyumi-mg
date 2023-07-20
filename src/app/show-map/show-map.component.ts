@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import {
   defineHex,
@@ -9,60 +9,66 @@ import {
   offsetToCubePointy,
   spiral,
 } from 'honeycomb-grid';
-import { HttpClient } from '@angular/common/http';
-import { Maprules } from '../maprules';
 import { HexagonType } from '../hexagon-type';
+import { ConfigService } from '../config.service';
 
 @Component({
   selector: 'app-show-map',
-  // template: '<canvas #pixiCanvas></canvas>',
   templateUrl: './show-map.component.html',
   styleUrls: ['./show-map.component.css'],
 })
 export class ShowMapComponent implements AfterViewInit {
   @ViewChild('pixiCanvas', { static: true })
   pixiCanvas!: ElementRef<HTMLCanvasElement>;
-  hexagonSize = 45;
-  hexagonOrigin = 'topLeft';
-  // Tatsächlichen Dimensionen des Grids
-  // gridWidth * gridHeight = Anzahl Hexagons sollte immer mindestens 28 sein
-  // Wir benötigen im Default 28 + 8 MondTiles
-  gridWidth = 8;
-  gridHeight = 8;
-  ruleSet: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
-  configUrl = 'assets/rules.json';
+  gridWidth = NaN;
+  gridHeight = NaN;
   hexagonTitles: HexagonType[][];
 
-  constructor(private http: HttpClient) {
-    this.getConfig();
+  constructor(private configService: ConfigService) {
+    this.finishConfiguration();
     this.hexagonTitles = new Array(this.gridWidth)
       .fill([])
       .map(() => Array(this.gridHeight).fill('leer'));
   }
-
   ngAfterViewInit(): void {
-    this.generateConfig();
+    this.createHexagonDrawing();
   }
 
-  getConfig() {
-    return this.http.get<Maprules>(this.configUrl);
-  }
+  /*
+    Konfigurationsabschnitt
+  */
 
-  generateConfig() {
-    return this.getConfig().subscribe({
-      next: (data: Maprules) => {
-        this.ruleSet = {
-          areaType: data.areaType,
-          hasMoon: data.hasMoon,
-          playerAmount: data.playerAmount,
-        };
-        console.log('Geladenes Regelwerk:');
-        console.log(this.ruleSet);
-      },
-      complete: () => {
-        this.createHexagonDrawing();
-      },
-    });
+  finishConfiguration() {
+    switch (this.configService.rules.playerAmount) {
+      case 2:
+        this.gridWidth = 4;
+        this.gridHeight = 4;
+        break;
+      case 3:
+        // Minimum 21 benötigt
+        this.gridWidth = 5;
+        this.gridHeight = 5;
+        break;
+      case 4:
+        // Minimum 28 benötigt
+        this.gridWidth = 8;
+        this.gridHeight = 8;
+        break;
+      case 5:
+        // Minimum 35 benötigt
+        this.gridWidth = 8;
+        this.gridHeight = 7;
+        break;
+      case 6:
+        this.gridWidth = 8;
+        this.gridHeight = 8;
+        break;
+
+      default:
+        this.gridWidth = 8;
+        this.gridHeight = 8;
+        break;
+    }
   }
 
   /*
@@ -87,6 +93,9 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   createHexagonsByAreaType(title: HexagonType) {
+    if (title === 'Mondfeld') {
+      return;
+    }
     let count = 0;
     let numberOfIterations = this.findAreaAmount(title);
 
@@ -138,8 +147,9 @@ export class ShowMapComponent implements AfterViewInit {
   }
 
   findAreaAmount(hexagonTitle: HexagonType): number {
-    return this.ruleSet.areaType.find((area) => area.title === hexagonTitle)
-      ?.requiredAmount!;
+    return this.configService.rules.areaType.find(
+      (area) => area.title === hexagonTitle
+    )?.requiredAmount!;
   }
 
   /*
@@ -195,7 +205,7 @@ export class ShowMapComponent implements AfterViewInit {
 
   createHexagonDrawing() {
     const Hex = defineHex({
-      dimensions: this.hexagonSize,
+      dimensions: 45,
       origin: 'topLeft',
     });
     const grid = new Grid(
@@ -209,7 +219,10 @@ export class ShowMapComponent implements AfterViewInit {
 
     const areaTypes = Object.values(HexagonType);
     for (const areaType of areaTypes) {
-      if (areaType === 'Mondfeld') {
+      if (
+        areaType === 'Mondfeld' &&
+        this.configService.rules.hasMoon === true
+      ) {
         this.createMondfeld(HexagonType.Mondfeld, grid);
       } else {
         this.createHexagonsByAreaType(areaType);

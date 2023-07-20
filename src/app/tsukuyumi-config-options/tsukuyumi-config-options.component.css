@@ -1,0 +1,30 @@
+.example-result-card {
+    width: 400px;
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .config-section {
+    margin-bottom: 10px;
+  }
+  
+  .slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .custom-slider {
+    width: 80%;
+  }
+  
+  .slider-label {
+    margin-bottom: 5px;
+  }
+  
+  .slider-value {
+    font-size: 16px;
+    margin-top: 10px;
+  }
