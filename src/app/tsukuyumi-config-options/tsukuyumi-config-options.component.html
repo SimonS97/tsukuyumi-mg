@@ -17,14 +17,14 @@
         >
         <mat-slider
           class="custom-slider"
-          [max]="area.requiredAmount"
           [max]="area.maxAmount || defaultMaxSliderValue"
           [min]="area.minAmount || defaultMinSliderValue"
+          [step]="1"
           [discrete]="true"
           [showTickMarks]="true"
-          (change)="changeAreaValue(area.title, areaSlider.value)"
+          (change)="changeAreaValue(areaSlider.value, area.title)"
         >
-          <input matSliderThumb #areaSlider />
+          <input matSliderThumb [(ngModel)]="area.requiredAmount" #areaSlider />
         </mat-slider>
       </div>
     </mat-card-content>

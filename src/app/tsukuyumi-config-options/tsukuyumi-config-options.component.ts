@@ -33,7 +33,7 @@ export class TsukuyumiConfigOptionsComponent {
     return foundArea?.requiredAmount!;
   }
 
-  changeAreaValue(areaTitle: string, sliderValue: string) {
+  changeAreaValue(sliderValue: string, areaTitle: string) {
     const areaObj = this.configService.rules.areaType.find(
       (area) => area.title === areaTitle
     );
@@ -41,12 +41,10 @@ export class TsukuyumiConfigOptionsComponent {
     if (areaObj) {
       const index = this.configService.rules.areaType.indexOf(areaObj);
 
-      if (index !== -1) {
-        this.configService.rules.areaType[index] = {
-          ...areaObj,
-          requiredAmount: parseInt(sliderValue, 10),
-        };
-      }
+      this.configService.rules.areaType[index] = {
+        ...areaObj,
+        requiredAmount: parseInt(sliderValue, 10),
+      };
     }
   }
 
