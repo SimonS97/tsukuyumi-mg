@@ -1,7 +1,4 @@
-/* show-map.component.css */
-
 canvas {
-  /* border: 1px solid #ccc; */
   margin-top: 20px;
 }
 
@@ -27,7 +24,7 @@ canvas {
   background-color: #0d47a1;
 }
 
-.home-button{
+.home-button {
   font-size: 24px;
   padding: 10px 20px;
   color: #fff;

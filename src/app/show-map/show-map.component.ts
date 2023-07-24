@@ -26,11 +26,15 @@ export class ShowMapComponent implements AfterViewInit {
 
   constructor(private configService: ConfigService) {
     this.finishConfiguration();
-    this.hexagonTitles = new Array(this.gridWidth)
-      .fill([])
-      .map(() => Array(this.gridHeight).fill('leer'));
+    this.hexagonTitles = [];
+    this.resetTitlesToDefault();
   }
   ngAfterViewInit(): void {
+    this.createHexagonDrawing();
+  }
+
+  refreshGrid() {
+    this.resetTitlesToDefault();
     this.createHexagonDrawing();
   }
 
@@ -39,91 +43,117 @@ export class ShowMapComponent implements AfterViewInit {
   */
 
   finishConfiguration() {
-    switch (this.configService.rules.playerAmount) {
-      case 2:
-        this.gridWidth = 4;
-        this.gridHeight = 4;
-        break;
-      case 3:
-        // Minimum 21 benötigt
-        this.gridWidth = 5;
-        this.gridHeight = 5;
-        break;
-      case 4:
-        // Minimum 28 benötigt
-        this.gridWidth = 8;
-        this.gridHeight = 8;
-        break;
-      case 5:
-        // Minimum 35 benötigt
-        this.gridWidth = 8;
-        this.gridHeight = 7;
-        break;
-      case 6:
-        this.gridWidth = 8;
-        this.gridHeight = 8;
-        break;
+    // Suche die richtige Grid-Größe für die ausgewählte Spieleranzahl
+    const playerAmount = this.configService.rules.selectedPlayerAmount;
+    const rule = this.configService.rules.gridSizeByPlayerAmount.find(
+      (gridSizeByPlayerAmount) => gridSizeByPlayerAmount.amount === playerAmount
+    );
 
-      default:
-        this.gridWidth = 8;
-        this.gridHeight = 8;
-        break;
+    if (rule) {
+      this.gridWidth = rule.gridSize.width;
+      this.gridHeight = rule.gridSize.height;
+    } else {
+      // Standardwerte, falls keine Übereinstimmung gefunden wurde
+      this.gridWidth = 8;
+      this.gridHeight = 8;
     }
   }
 
   /*
-    Hier werden die Einzelnen Hexagon-Fälle generiert anhand es ruleSet
+    Abschnitt zur Auswertung des Regelwerks und der Anlage der Textfelder
   */
 
   createMondfeld(title: HexagonType, grid: Grid<Hex>) {
-    let randomIndex1 = Math.floor(Math.random() * 6) + 1;
-    let randomIndex2 = Math.floor(Math.random() * 6) + 1;
-    if (randomIndex1 === 6 && randomIndex2 === 3) {
-      randomIndex1 = 5;
-    }
-    console.log('Mondfeld Korrdinaten:' + randomIndex1 + '|' + randomIndex2);
+    let randomCol = Math.floor(Math.random() * (this.gridWidth - 2)) + 1;
+    let randomRow = Math.floor(Math.random() * (this.gridHeight - 2)) + 1;
+
+    console.log('Mondfeld Korrdinaten:' + randomCol + '|' + randomRow);
 
     const spiralTraverser = spiral({
-      start: [randomIndex1, randomIndex2],
+      start: [randomCol, randomRow],
       radius: 1,
     });
+
+    let enoughIterations = 0;
     grid.traverse(spiralTraverser).forEach((hex) => {
       this.hexagonTitles[hex.col][hex.row] = HexagonType.Mondfeld;
+      enoughIterations++;
     });
+
+    // Das Mondfeld muss immer aus 7 Feldern bestehen
+    if (enoughIterations < 7) {
+      this.resetTitlesToDefault();
+      this.createMondfeld(title, grid);
+    }
   }
 
   createHexagonsByAreaType(title: HexagonType) {
-    if (title === 'Mondfeld') {
+    if (title === 'Mondfeld' || title === 'leer') {
       return;
     }
     let count = 0;
     let numberOfIterations = this.findAreaAmount(title);
 
     while (count < numberOfIterations) {
-      let randomIndex1 = Math.floor(Math.random() * this.gridHeight);
-      let randomIndex2 = Math.floor(Math.random() * this.gridWidth);
+      let randomCol = Math.floor(Math.random() * this.gridHeight);
+      let randomRow = Math.floor(Math.random() * this.gridWidth);
 
-      let titleSetCorrectly = false;
-      while (titleSetCorrectly === false) {
-        let tempTitle = this.hexagonTitles[randomIndex1][randomIndex2];
-        if (this.isHexagonValidTarget(tempTitle)) {
-          this.hexagonTitles[randomIndex1][randomIndex2] = title;
-          count++;
-          titleSetCorrectly = true;
-        }
-        if (randomIndex1 <= this.gridHeight - 2) {
-          randomIndex1++;
-        } else if (randomIndex2 <= this.gridWidth - 2) {
-          randomIndex2++;
-        } else {
-          randomIndex1 = 0;
-          randomIndex2 = 0;
-        }
+      while (
+        !this.hexAtCoordIsEmpty(this.hexagonTitles[randomCol][randomRow])
+      ) {
+        randomCol = Math.floor(Math.random() * this.gridHeight);
+        randomRow = Math.floor(Math.random() * this.gridWidth);
+      }
+
+      this.hexagonTitles[randomCol][randomRow] = title;
+      count++;
+    }
+    console.log('HexagonFelder erstellt für: ' + title);
+  }
+
+  /*
+    Hilfsfunktionen für Validierungen und Prüfungen
+  */
+
+  resetTitlesToDefault() {
+    this.hexagonTitles = this.hexagonTitles = new Array(this.gridWidth)
+      .fill([])
+      .map(() => Array(this.gridHeight).fill('leer'));
+  }
+
+  hexAtCoordIsEmpty(hexagon: string): boolean {
+    if (hexagon === 'leer') {
+      return true;
+    }
+    return false;
+  }
+
+  hasHexNeighbours(hex: Hex, grid: Grid<Hex>): boolean {
+    for (let direction in Direction) {
+      let foundHex = grid.neighborOf(hex, Number(direction), {
+        allowOutside: false,
+      });
+      if (
+        foundHex !== undefined &&
+        this.hexAtCoordIsEmpty(
+          this.hexagonTitles[foundHex.col][foundHex.row]
+        ) === false
+      ) {
+        return true;
       }
     }
+
+    return false;
+  }
+
+  findAreaAmount(hexagonTitle: HexagonType): number {
+    return this.configService.rules.areaType.find(
+      (area) => area.title === hexagonTitle
+    )?.requiredAmount!;
   }
 
   moveHexagon(col: number, row: number) {
+    console.log('Versuche Hex zu bewegen...');
     let tempTitle = this.hexagonTitles[col][row];
     let customOffset = 'NaN';
 
@@ -146,62 +176,10 @@ export class ShowMapComponent implements AfterViewInit {
     );
   }
 
-  findAreaAmount(hexagonTitle: HexagonType): number {
-    return this.configService.rules.areaType.find(
-      (area) => area.title === hexagonTitle
-    )?.requiredAmount!;
-  }
-
   /*
-    Hexagon Validierungen und Fachliche Prüfungen
+    Hier wird das rendern und zeichnen der Hexagons durchgeführt
+    Styling + Bild Generierung
   */
-
-  isHexagonValidTarget(hexagon: string): boolean {
-    if (hexagon === 'leer') {
-      return true;
-    }
-    return false;
-  }
-
-  hasHexNeighbours(hex: Hex, grid: Grid<Hex>): boolean {
-    let directions: Direction[] = [
-      Direction.N,
-      Direction.NE,
-      Direction.E,
-      Direction.SE,
-      Direction.S,
-      Direction.SW,
-      Direction.W,
-    ];
-
-    for (let direction in directions) {
-      let foundHex = grid.neighborOf(hex, Number(direction), {
-        allowOutside: false,
-      });
-      if (
-        foundHex !== undefined &&
-        this.isHexagonValidTarget(
-          this.hexagonTitles[foundHex.col][foundHex.row]
-        ) === false
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /*
-    Hier wird das rendern der Hexagons durchgeführt
-    Styling + Textübergabe
-  */
-
-  refreshGrid() {
-    this.hexagonTitles = this.hexagonTitles = new Array(this.gridWidth)
-      .fill([])
-      .map(() => Array(this.gridHeight).fill('leer'));
-    this.createHexagonDrawing();
-  }
 
   createHexagonDrawing() {
     const Hex = defineHex({
@@ -238,6 +216,7 @@ export class ShowMapComponent implements AfterViewInit {
     const graphics = new PIXI.Graphics();
     app.stage.addChild(graphics);
 
+    // Prüfung ob alle Hexagons einen direkten Nachbarn besitzen
     grid.forEach((hex: Hex) => {
       let title = this.hexagonTitles[hex.col][hex.row];
       if (title !== 'leer' && this.hasHexNeighbours(hex, grid) === false) {
@@ -245,156 +224,36 @@ export class ShowMapComponent implements AfterViewInit {
       }
     });
 
-    let counter = 0;
     grid.forEach((hex: Hex) => {
-      const newText = this.renderHex(hex, graphics, counter);
+      const newText = this.renderHex(hex, graphics);
       app.stage.addChild(newText);
-      counter++;
     });
-    console.log(counter);
   }
 
-  renderHex(hex: any, graphics: PIXI.Graphics, counter: number): PIXI.Sprite {
-    // Übergebene Titel des Hexagons
+  renderHex(hex: any, graphics: PIXI.Graphics): PIXI.Sprite {
     let title = this.hexagonTitles[hex.col][hex.row];
-
-    // Setze den Linienstyle der Hexagons
-    // this.setHexagonLineStyle(graphics, title);
-    // graphics.lineStyle(1, '#ffffff', 0.5);
-
-    // Ermittle den Textstyle, falls benötigt
-    const textStyle = this.getHexagonText(title);
 
     graphics.drawShape(new PIXI.Polygon(hex.corners));
 
-    // Einkommentieren und nutzen um die korrekten Koordinaten der Hexagons zu sehen (q|r)
-    let coordinateText = hex.col.toString() + '/' + hex.row.toString();
-    // let coordinateText =
-    //   hex.q.toString() + '/' + hex.r.toString() + '/' + hex.s.toString();
-    if (title === 'leer') {
-      // coordinateText = '';
-    }
-
-    // Wechseln zwischen Bildern und Koordinaten Ansicht
     let newSprite = this.createHexagonImage(title, hex);
-    // let newSprite = this.createHexagonText(
-    //   hex,
-    //   coordinateText,
-    //   textStyle,
-    //   counter
-    // );
 
     return newSprite;
   }
 
-  createHexagonText(
-    hex: Hex,
-    title: string,
-    textStyle: any,
-    arrayIndex: number
-  ) {
-    const text = new PIXI.Text(title, textStyle);
-    text.anchor.set(0.5);
-    text.x = hex.x;
-    text.y = hex.y;
-
-    text.anchor.set(0.5);
-    text.x = hex.x;
-    text.y = hex.y;
-
-    return text;
-  }
-
   createHexagonImage(hexagonTitle: HexagonType, hex: Hex): PIXI.Sprite {
+    // Leere Hexagons werden visuell nicht repräsentiert
     if (hexagonTitle === 'leer') {
       return new PIXI.Sprite();
     }
     const texture = PIXI.Texture.from('assets/' + hexagonTitle + '.png');
     const sprite = new PIXI.Sprite(texture);
 
-    // Zentrierung und Anpassung der Bilder / Winkel etc
+    // Zentrierung und Anpassung der Bilder, Winkel und Rotation
     sprite.anchor.set(0.5);
     sprite.x = hex.x;
     sprite.y = hex.y;
     sprite.scale.set(0.12);
     sprite.rotation = 0.52;
     return sprite;
-  }
-
-  getHexagonText(title: HexagonType): PIXI.TextStyle {
-    const textStyle = new PIXI.TextStyle({
-      fill: '#000000',
-      fontSize: 12,
-      fontWeight: 'bold',
-      wordWrap: true,
-      wordWrapWidth: 10,
-      align: 'center',
-    });
-    switch (title) {
-      case 'leer':
-        return textStyle;
-      case 'Meeresboden':
-        textStyle.fill = '#2CA6A4';
-        return textStyle;
-      case 'Schwemmland':
-        textStyle.fill = '#776D5A';
-        return textStyle;
-      case 'Gebirge':
-        textStyle.fill = '#655356';
-        return textStyle;
-      case 'Flussland':
-        textStyle.fill = '#25CED1';
-        return textStyle;
-      case 'Instabil':
-        textStyle.fill = '#E05263';
-        return textStyle;
-      case 'Radioaktiv':
-        textStyle.fill = '#FAE500';
-        return textStyle;
-      case 'Tsukuyumi':
-        textStyle.fill = '#7E52A0';
-        return textStyle;
-      case 'Toxisch':
-        textStyle.fill = '#2B9720';
-        return textStyle;
-
-      default:
-        return textStyle;
-    }
-  }
-
-  setHexagonLineStyle(graphics: PIXI.Graphics, hexagonTitle: HexagonType) {
-    switch (hexagonTitle) {
-      case 'leer':
-        graphics.lineStyle(1, '#ffffff', 0.5);
-        break;
-      case 'Meeresboden':
-        graphics.lineStyle(1, '#2CA6A4');
-        break;
-      case 'Schwemmland':
-        graphics.lineStyle(1, '#776D5A');
-        break;
-      case 'Gebirge':
-        graphics.lineStyle(1, '#655356');
-        break;
-      case 'Flussland':
-        graphics.lineStyle(1, '#25CED1');
-        break;
-      case 'Instabil':
-        graphics.lineStyle(1, '#E05263');
-        break;
-      case 'Radioaktiv':
-        graphics.lineStyle(1, '#FAE500');
-        break;
-      case 'Tsukuyumi':
-        graphics.lineStyle(1, '#7E52A0');
-        break;
-      case 'Toxisch':
-        graphics.lineStyle(1, '#2B9720');
-        break;
-
-      default:
-        graphics.lineStyle(1, 0x999999);
-    }
   }
 }

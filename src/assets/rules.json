@@ -1,6 +1,11 @@
 {
   "areaType": [
     {
+      "requiredAmount": 7,
+      "title": "Mondfeld",
+      "maxAmount": 7
+    },
+    {
       "requiredAmount": 14,
       "title": "Meeresboden",
       "maxAmount": 30
@@ -32,13 +37,24 @@
     {
       "requiredAmount": 1,
       "title": "Toxisch"
-    },
-    {
-      "requiredAmount": 7,
-      "title": "Mondfeld",
-      "maxAmount": 7
     }
   ],
   "hasMoon": true,
-  "playerAmount": 4
+  "selectedPlayerAmount": 4,
+  "gridSizeByPlayerAmount": [
+    {
+      "amount": 4,
+      "gridSize": {
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "amount": 5,
+      "gridSize": {
+        "width": 7,
+        "height": 7
+      }
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ConfigService } from '../config.service';
 import { MatSelectChange } from '@angular/material/select';
 import { MatCheckboxChange } from '@angular/material/checkbox';
@@ -26,7 +26,7 @@ export class HomeComponent {
 
   selectPlayer(event: MatSelectChange) {
     const selectedPlayerCount: number = parseInt(event.value, 10);
-    this.configService.rules.playerAmount = selectedPlayerCount;
+    this.configService.rules.selectedPlayerAmount = selectedPlayerCount;
   }
 
   isDefaultSetting(event: MatCheckboxChange) {

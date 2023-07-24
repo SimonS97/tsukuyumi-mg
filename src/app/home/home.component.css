@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  flex-wrap: wrap; /* Container wird bei Bedarf in eine neue Zeile verschoben */
+  flex-wrap: wrap;
 }
 
 .main-content {

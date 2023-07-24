@@ -7,8 +7,13 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ConfigService {
   ruleUrl = 'assets/rules.json';
-  rules: Maprules = { areaType: [], hasMoon: false, playerAmount: 0 };
-  gameToPlay = "Tsukuyumi";
+  rules: Maprules = {
+    areaType: [],
+    hasMoon: false,
+    gridSizeByPlayerAmount: [],
+    selectedPlayerAmount: 0,
+  };
+  gameToPlay = 'Tsukuyumi';
 
   constructor(private http: HttpClient) {}
 
@@ -22,7 +27,8 @@ export class ConfigService {
         this.rules = {
           areaType: data.areaType,
           hasMoon: data.hasMoon,
-          playerAmount: data.playerAmount,
+          gridSizeByPlayerAmount: data.gridSizeByPlayerAmount,
+          selectedPlayerAmount: data.selectedPlayerAmount,
         };
         console.log('Geladenes Regelwerk:');
         console.log(this.rules);
