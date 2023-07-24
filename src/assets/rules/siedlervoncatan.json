@@ -1,0 +1,62 @@
+{
+  "areaType": [
+    {
+      "requiredAmount": 10,
+      "title": "Mondfeld",
+      "maxAmount": 10
+    },
+    {
+      "requiredAmount": 5,
+      "title": "Meeresboden",
+      "maxAmount": 10
+    },
+    {
+      "requiredAmount": 6,
+      "title": "Schwemmland"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Gebirge"
+    },
+    {
+      "requiredAmount": 4,
+      "title": "Flussland"
+    },
+    {
+      "requiredAmount": 6,
+      "title": "Instabil"
+    },
+    {
+      "requiredAmount": 3,
+      "title": "Radioaktiv"
+    },
+    {
+      "requiredAmount": 2,
+      "title": "Tsukuyumi"
+    },
+    {
+      "requiredAmount": 1,
+      "title": "Toxisch"
+    }
+  ],
+  "hasMoon": false,
+  "selectedPlayerAmount": 4,
+  "gridSizeByPlayerAmount": [
+    {
+      "expectedTileAmount": 36,
+      "amount": 4,
+      "gridSize": {
+        "width": 7,
+        "height": 7
+      }
+    },
+    {
+      "expectedTileAmount": 49,
+      "amount": 5,
+      "gridSize": {
+        "width": 7,
+        "height": 7
+      }
+    }
+  ]
+}

@@ -6,7 +6,6 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ConfigService {
-  ruleUrl = 'assets/rules.json';
   rules: Maprules = {
     areaType: [],
     hasMoon: false,
@@ -18,7 +17,8 @@ export class ConfigService {
   constructor(private http: HttpClient) {}
 
   getConfig() {
-    return this.http.get<Maprules>(this.ruleUrl);
+    const ruleUrl = this.getGameRuleSetUrl(this.gameToPlay);
+    return this.http.get<Maprules>(ruleUrl);
   }
 
   generateConfig() {
@@ -34,5 +34,9 @@ export class ConfigService {
         console.log(this.rules);
       },
     });
+  }
+
+  private getGameRuleSetUrl(gameToLoad: string): string {
+    return `assets/rules/${gameToLoad.toLowerCase()}.json`;
   }
 }

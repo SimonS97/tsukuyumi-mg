@@ -11,17 +11,18 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 export class HomeComponent {
   title = 'Tsukuyumi Map Generator';
   defaultSettings: boolean = true;
-  gameToPlay = '';
+  gameToPlay = 'Tsukuyumi';
+
   constructor(private configService: ConfigService) {
     console.log('Konfiguration in Home geladen!');
-    configService.generateConfig();
-    this.gameToPlay = configService.gameToPlay;
+    this.configService.generateConfig();
   }
 
   selectGame(event: MatSelectChange) {
     const newGame: string = event.value.toString();
     this.gameToPlay = newGame;
     this.configService.gameToPlay = newGame;
+    this.configService.generateConfig();
   }
 
   selectPlayer(event: MatSelectChange) {

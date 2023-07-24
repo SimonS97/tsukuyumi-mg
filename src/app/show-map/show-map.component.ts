@@ -29,6 +29,7 @@ export class ShowMapComponent implements AfterViewInit {
     this.hexagonTitles = [];
     this.resetTitlesToDefault();
   }
+  
   ngAfterViewInit(): void {
     this.createHexagonDrawing();
   }
