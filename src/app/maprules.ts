@@ -5,6 +5,7 @@ export interface Maprules {
   hasMoon: boolean;
   gridSizeByPlayerAmount: {
     amount: number;
+    expectedTileAmount: number,
     gridSize: {
       width: number;
       height: number;

@@ -2,7 +2,16 @@
   <mat-card class="example-result-card">
     <mat-card-content>
       <h2>Konfiguration</h2>
-      <h2>Gesamtanzahl Felder: {{ getAllAvailableAreas() }}</h2>
+      <h2
+        matTooltip="{{ generateTooltip() }}"
+        matTooltipPosition="after"
+        matTooltipClass="error-tooltip"
+      >
+        Gesamtanzahl Felder: {{ getAllAvailableAreas() }}
+        <span *ngIf="!validateSelection()" class="tooltip-icon">
+          <mat-icon>error</mat-icon>
+        </span>
+      </h2>
 
       <div class="config-section">
         <mat-checkbox

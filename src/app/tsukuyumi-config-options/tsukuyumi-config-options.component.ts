@@ -46,6 +46,8 @@ export class TsukuyumiConfigOptionsComponent {
         requiredAmount: parseInt(sliderValue, 10),
       };
     }
+
+    this.validateSelection();
   }
 
   getAllAvailableAreas(): number {
@@ -54,5 +56,35 @@ export class TsukuyumiConfigOptionsComponent {
       amount += area.requiredAmount;
     });
     return amount;
+  }
+
+  validateSelection(): boolean {
+    const selectedAreas = this.getAllAvailableAreas();
+
+    const currentPlayerAmount = this.configService.rules.selectedPlayerAmount;
+    const gridSizeConfig = this.configService.rules.gridSizeByPlayerAmount.find(
+      (config) => config.amount === currentPlayerAmount
+    );
+
+    if (!gridSizeConfig) {
+      return false;
+    }
+
+    const expectedTileAmount = gridSizeConfig.expectedTileAmount;
+    return selectedAreas <= expectedTileAmount;
+  }
+
+  generateTooltip(): string {
+    const currentPlayerAmount = this.configService.rules.selectedPlayerAmount;
+    const gridSizeConfig = this.configService.rules.gridSizeByPlayerAmount.find(
+      (config) => config.amount === currentPlayerAmount
+    );
+    let tooltip =
+      'Bei ' +
+      this.configService.rules.selectedPlayerAmount +
+      " Spielern sind maximal '" +
+      gridSizeConfig?.expectedTileAmount +
+      "' Felder erlaubt";
+    return tooltip;
   }
 }

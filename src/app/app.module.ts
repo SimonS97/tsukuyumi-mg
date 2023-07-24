@@ -13,8 +13,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { HomeComponent } from './home/home.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ShowMapComponent } from './show-map/show-map.component';
 import { TsukuyumiConfigOptionsComponent } from './tsukuyumi-config-options/tsukuyumi-config-options.component';
 
@@ -32,7 +34,9 @@ import { TsukuyumiConfigOptionsComponent } from './tsukuyumi-config-options/tsuk
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
+    MatTooltipModule,
     MatCheckboxModule,
     HttpClientModule,
     FormsModule,
