@@ -43,6 +43,7 @@ import { TsukuyumiConfigOptionsComponent } from './tsukuyumi-config-options/tsuk
     MatSelectModule,
     MatSliderModule,
   ],
+  exports: [MatFormFieldModule],
   providers: [],
   bootstrap: [AppComponent],
 })

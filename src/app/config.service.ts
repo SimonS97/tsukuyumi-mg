@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 export class ConfigService {
   rules: Maprules = {
     areaType: [],
-    hasMoon: false,
+    hasMoon: true,
     gridSizeByPlayerAmount: [],
     selectedPlayerAmount: 0,
   };
