@@ -43,6 +43,14 @@
   "selectedPlayerAmount": 4,
   "gridSizeByPlayerAmount": [
     {
+      "expectedTileAmount": 25,
+      "amount": 3,
+      "gridSize": {
+        "width": 5,
+        "height": 5
+      }
+    },
+    {
       "expectedTileAmount": 36,
       "amount": 4,
       "gridSize": {

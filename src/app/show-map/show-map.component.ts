@@ -29,7 +29,7 @@ export class ShowMapComponent implements AfterViewInit {
     this.hexagonTitles = [];
     this.resetTitlesToDefault();
   }
-  
+
   ngAfterViewInit(): void {
     this.createHexagonDrawing();
   }
@@ -215,6 +215,7 @@ export class ShowMapComponent implements AfterViewInit {
       view: this.pixiCanvas.nativeElement,
     });
     const graphics = new PIXI.Graphics();
+
     app.stage.addChild(graphics);
 
     // Prüfung ob alle Hexagons einen direkten Nachbarn besitzen
@@ -226,7 +227,13 @@ export class ShowMapComponent implements AfterViewInit {
     });
 
     grid.forEach((hex: Hex) => {
+      const newX = 120;
+      const newY = 50;
+
       const newText = this.renderHex(hex, graphics);
+
+      newText.x = newText.x + newX;
+      newText.y = newText.y + newY;
       app.stage.addChild(newText);
     });
   }
