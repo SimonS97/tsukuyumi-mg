@@ -17,19 +17,10 @@ canvas {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.refresh-button:hover {
-  background-color: #1976d2;
 }
 
 .refresh-button:focus {
   outline: none;
-}
-
-.refresh-button:active {
-  background-color: #0d47a1;
 }
 
 .home-button {
@@ -39,17 +30,8 @@ canvas {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.home-button:hover {
-  background-color: #902923;
 }
 
 .home-button:focus {
   outline: none;
-}
-
-.home-button:active {
-  background-color: #902923;
 }
