@@ -51,7 +51,7 @@
       }
     },
     {
-      "expectedTileAmount": 36,
+      "expectedTileAmount": 35,
       "amount": 4,
       "gridSize": {
         "width": 6,
