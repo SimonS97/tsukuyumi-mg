@@ -11,7 +11,7 @@
       "maxAmount": 30
     },
     {
-      "requiredAmount": 1,
+      "requiredAmount": 2,
       "title": "Schwemmland"
     },
     {
@@ -31,7 +31,7 @@
       "title": "Radioaktiv"
     },
     {
-      "requiredAmount": 1,
+      "requiredAmount": 2,
       "title": "Tsukuyumi"
     },
     {
